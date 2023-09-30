@@ -159,13 +159,17 @@ BOOL CALLBACK ExitWindowsDlgProc(
 					GetWindowLongW(hWnd, GWL_EXSTYLE)
 				);
 
+				int nWidth = GetSystemMetrics(SM_CXSCREEN);
+				int nHeight = GetSystemMetrics(SM_CYSCREEN);
+
 				SetWindowPos(
 					hWnd,
 					NULL,
-					0, 0,
+					(nWidth / 2) - ((rcDesired.right - rcDesired.left) / 2),
+					(nHeight / 2) - ((rcDesired.bottom - rcDesired.top) / 2),
 					rcDesired.right - rcDesired.left,
 					rcDesired.bottom - rcDesired.top,
-					SWP_NOMOVE | SWP_NOZORDER | SWP_NOACTIVATE
+					SWP_NOZORDER | SWP_NOACTIVATE
 				);
 			}
 

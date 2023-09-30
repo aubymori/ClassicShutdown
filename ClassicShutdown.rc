@@ -1,18 +1,18 @@
 #include <windows.h>
 #include "resource.h"
 
-IDI_CLASSICSHUTDOWN  ICON  "ClassicShutdown.ico"
+IDI_CLASSICSHUTDOWN ICON "ClassicShutdown.ico"
 
 IDD_EXITWINDOWS DIALOG 0, 0, 274, 103
 STYLE DS_SHELLFONT | DS_MODALFRAME | DS_CENTER | WS_POPUP | WS_CAPTION | WS_SYSMENU
 CAPTION "Shut Down Windows"
 LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
-FONT 8, "MS Shell Dlg"
+FONT 8, "MS Shell Dlg 2"
 {
 	CONTROL 0, IDD_EXITWINDOWS_ICON, STATIC, SS_ICON | WS_CHILD | WS_VISIBLE | WS_GROUP, 7, 7, 20, 20
 	CONTROL "What do you want the computer to do?", -1, STATIC, SS_LEFT | WS_CHILD | WS_VISIBLE | WS_GROUP, 39, 7, 153, 10
 	CONTROL "", IDD_EXITWINDOWS_COMBOBOX, COMBOBOX, CBS_DROPDOWNLIST | WS_CHILD | WS_VISIBLE | WS_VSCROLL | WS_TABSTOP, 39, 20, 180, 57
-	CONTROL "", IDD_EXITWINDOWS_LABEL, STATIC, SS_LEFT | WS_CHILD | WS_VISIBLE | WS_GROUP, 39, 40, 165, 33
+	CONTROL "", IDD_EXITWINDOWS_LABEL, STATIC, SS_LEFT | WS_CHILD | WS_VISIBLE | WS_GROUP, 39, 40, 180, 33
 	CONTROL "OK", IDOK, BUTTON, BS_DEFPUSHBUTTON | WS_CHILD | WS_VISIBLE | WS_GROUP | WS_TABSTOP, 108, 82, 50, 14
 	CONTROL "Cancel", IDCANCEL, BUTTON, BS_PUSHBUTTON | WS_CHILD | WS_VISIBLE | WS_TABSTOP, 162, 82, 50, 14
 	CONTROL "&Help", IDHELP, BUTTON, BS_PUSHBUTTON | WS_CHILD | WS_VISIBLE | WS_TABSTOP, 216, 82, 50, 14
@@ -21,7 +21,7 @@ FONT 8, "MS Shell Dlg"
 IDD_LOGOFFWINDOWS DIALOGEX 0, 0, 188, 60
 STYLE DS_SHELLFONT | DS_MODALFRAME | DS_CENTER | WS_POPUP | WS_CAPTION | WS_SYSMENU
 CAPTION "Log Off Windows"
-FONT 8, "MS Shell Dlg"
+FONT 8, "MS Shell Dlg 2"
 {
 	CONTROL 0, IDD_LOGOFFWINDOWS_ICON, STATIC, SS_ICON | WS_CHILD | WS_VISIBLE, 8, 6, 18, 20
 	CONTROL "Are you sure you want to log off?", -1, STATIC, SS_LEFT | WS_CHILD | WS_VISIBLE | WS_GROUP, 49, 15, 131, 8
@@ -31,10 +31,14 @@ FONT 8, "MS Shell Dlg"
 
 STRINGTABLE
 {
-	IDS_LOGOFF  "Log off %s"
-	IDS_LOGOFF_DESC "Ends your session, leaving the computer running on full power."
-	IDS_SHUTDOWN "Shut down"
+	IDS_LOGOFF        "Log off %s"
+	IDS_LOGOFF_DESC   "Ends your session, leaving the computer running on full power."
+	IDS_SHUTDOWN      "Shut down"
 	IDS_SHUTDOWN_DESC "Ends your session and shuts down Windows so that you can safely turn off power."
-	IDS_RESTART "Restart"
-	IDS_RESTART_DESC "Ends your session, shuts down Windows, and starts Windows again."
+	IDS_RESTART       "Restart"
+	IDS_RESTART_DESC  "Ends your session, shuts down Windows, and starts Windows again."
+	IDS_STANDBY       "Stand by"
+	IDS_STANDBY_DESC  "Maintains your session, keeping the computer running on low power with data still in memory."
+	IDS_LOCK          "Lock"
+	IDS_LOCK_DESC     "Maintains your session, requiring you to log in to access your desktop again."
 }

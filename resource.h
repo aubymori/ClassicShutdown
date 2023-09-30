@@ -14,3 +14,7 @@
 #define  IDS_SHUTDOWN_DESC         303
 #define  IDS_RESTART               304
 #define  IDS_RESTART_DESC          305
+#define  IDS_STANDBY               306
+#define  IDS_STANDBY_DESC          307
+#define  IDS_LOCK                  308
+#define  IDS_LOCK_DESC             309

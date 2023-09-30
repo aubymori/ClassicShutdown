@@ -1,5 +1,6 @@
 #include <windows.h>
 #include <lmcons.h>
+#include <powrprof.h>
 
 #include "resource.h"
 
@@ -64,18 +65,6 @@ VOID MoveChildren(HWND hWnd, INT dx, INT dy)
 	SetWindowPos(hWnd, NULL,
 		0, 0, (rc.right - rc.left) + dx, (rc.bottom - rc.top) + dy,
 		SWP_NOZORDER | SWP_NOMOVE);
-}
-
-void ExecuteShutdown(LPCWSTR pczOptions)
-{
-	ShellExecuteW(
-		NULL,
-		L"open",
-		L"C:\\Windows\\System32\\shutdown.exe",
-		pczOptions,
-		NULL,
-		SW_HIDE
-	);
 }
 
 void ScreenshotDesktop(void)
@@ -174,7 +163,7 @@ BOOL CALLBACK ExitWindowsDlgProc(
 			}
 
 			HWND hComboBox = GetDlgItem(hWnd, IDD_EXITWINDOWS_COMBOBOX);
-			WCHAR szLogoffFormat[64], szLogoff[300], szShutdown[64], szRestart[64], szUsername[UNLEN + 1];
+			WCHAR szLogoffFormat[64], szLogoff[300], szShutdown[64], szRestart[64], szStandby[64], szLock[64], szUsername[UNLEN + 1];
 
 			LoadStringW(g_hAppInstance, IDS_LOGOFF, szLogoffFormat, 64);
 			
@@ -185,10 +174,14 @@ BOOL CALLBACK ExitWindowsDlgProc(
 
 			LoadStringW(g_hAppInstance, IDS_SHUTDOWN, szShutdown, 64);
 			LoadStringW(g_hAppInstance, IDS_RESTART, szRestart, 64);
+			LoadStringW(g_hAppInstance, IDS_STANDBY, szStandby, 64);
+			LoadStringW(g_hAppInstance, IDS_LOCK, szLock, 64);
 
 			SendMessageW(hComboBox, CB_ADDSTRING, 0, (LPARAM)szLogoff);
 			SendMessageW(hComboBox, CB_ADDSTRING, 0, (LPARAM)szShutdown);
 			SendMessageW(hComboBox, CB_ADDSTRING, 0, (LPARAM)szRestart);
+			SendMessageW(hComboBox, CB_ADDSTRING, 0, (LPARAM)szStandby);
+			SendMessageW(hComboBox, CB_ADDSTRING, 0, (LPARAM)szLock);
 			SendMessageW(hComboBox, CB_SETCURSEL, 1, 0);
 
 			WCHAR szShutdownDesc[256];
@@ -248,6 +241,12 @@ BOOL CALLBACK ExitWindowsDlgProc(
 					case 2:
 						uStringId = IDS_RESTART_DESC;
 						break;
+					case 3:
+						uStringId = IDS_STANDBY_DESC;
+						break;
+					case 4:
+						uStringId = IDS_LOCK_DESC;
+						break;
 				}
 
 				if (uStringId != NULL)
@@ -272,21 +271,31 @@ BOOL CALLBACK ExitWindowsDlgProc(
 						);
 						switch (i)
 						{
+							/* Log off */
 							case 0:
-								ShellExecuteW(
+								ExitWindowsEx(EWX_LOGOFF, 0);
+								break;
+							/* Shut down */
+							case 1:
+								InitiateSystemShutdownW(
 									NULL,
-									L"open",
-									L"C:\\Windows\\System32\\logoff.exe",
 									NULL,
-									NULL,
-									SW_HIDE
+									0,
+									FALSE,
+									FALSE
 								);
 								break;
-							case 1:
-								ExecuteShutdown(L"-s -t 0");
-								break;
+							/* Restart */
 							case 2:
-								ExecuteShutdown(L"-r -t 0");
+								ExitWindowsEx(EWX_REBOOT, 0);
+								break;
+							/* Stand by */
+							case 3:
+								SetSuspendState(FALSE, TRUE, FALSE);
+								break;
+							/* Lock */
+							case 4:
+								LockWorkStation();
 								break;
 						}
 						EndDialog(hWnd, 0);
@@ -353,14 +362,7 @@ BOOL CALLBACK LogoffDlgProc(
 			switch (wParam)
 			{
 				case IDOK:
-					ShellExecuteW(
-						NULL,
-						L"open",
-						L"C:\\Windows\\System32\\logoff.exe",
-						NULL,
-						NULL,
-						SW_HIDE
-					);
+					ExitWindowsEx(EWX_LOGOFF, 0);
 				case IDCANCEL:
 					EndDialog(hWnd, 0);
 			}
@@ -411,6 +413,20 @@ int WINAPI wWinMain(
 	_In_     int       nCmdShow
 )
 {
+	/* Apply the needed privilege for shutting down */
+	HANDLE hToken;
+	TOKEN_PRIVILEGES tp;
+	LUID luid;
+
+	OpenProcessToken(GetCurrentProcess(), TOKEN_ADJUST_PRIVILEGES | TOKEN_QUERY, &hToken);
+	LookupPrivilegeValueW(NULL, SE_SHUTDOWN_NAME, &luid);
+
+	tp.PrivilegeCount = 1;
+	tp.Privileges[0].Luid = luid;
+	tp.Privileges[0].Attributes = SE_PRIVILEGE_ENABLED;
+
+	AdjustTokenPrivileges(hToken, FALSE, &tp, sizeof(TOKEN_PRIVILEGES), NULL, NULL);
+
 	g_hAppInstance = hInstance;
 	g_hShell32 = LoadLibraryW(L"shell32.dll");
 

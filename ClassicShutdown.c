@@ -11,6 +11,9 @@ HBITMAP   g_hbDesktop, g_hbBrand;
 HINSTANCE g_hAppInstance, g_hShell32;
 BOOL      bLogoff;
 
+/* Virtual screen metrics */
+int x, y, cx, cy;
+
 /**
   * From Windows 2000 source code:
   * private\shell\shell32\restart.c
@@ -72,17 +75,14 @@ void ScreenshotDesktop(void)
 	HDC hScreenDC = GetDC(NULL);
 	HDC hMemDC = CreateCompatibleDC(hScreenDC);
 
-	int nWidth = GetDeviceCaps(hScreenDC, HORZRES);
-	int nHeight = GetDeviceCaps(hScreenDC, VERTRES);
-
-	g_hbDesktop = CreateCompatibleBitmap(hScreenDC, nWidth, nHeight);
+	g_hbDesktop = CreateCompatibleBitmap(hScreenDC, cx, cy);
 	HBITMAP hbOld = (HBITMAP)SelectObject(hMemDC, g_hbDesktop);
 	BitBlt(
 		hMemDC,
 		0, 0,
-		nWidth, nHeight,
+		cx, cy,
 		hScreenDC,
-		0, 0,
+		x, y,
 		SRCCOPY
 	);
 
@@ -413,6 +413,12 @@ int WINAPI wWinMain(
 	_In_     int       nCmdShow
 )
 {
+	/* Set virtual screen metrics */
+	x = GetSystemMetrics(SM_XVIRTUALSCREEN);
+	y = GetSystemMetrics(SM_YVIRTUALSCREEN);
+	cx = GetSystemMetrics(SM_CXVIRTUALSCREEN);
+	cy = GetSystemMetrics(SM_CYVIRTUALSCREEN);
+
 	/* Apply the needed privilege for shutting down */
 	HANDLE hToken;
 	TOKEN_PRIVILEGES tp;
@@ -478,10 +484,10 @@ int WINAPI wWinMain(
 		CLASS_NAME,                    /* lpClassName */
 		L"",                           /* lpWindowName */
 		WS_POPUP,                      /* dwStyle */
-		0,                             /* X */
-		0,                             /* Y */
-		GetSystemMetrics(SM_CXSCREEN), /* nWidth */
-		GetSystemMetrics(SM_CYSCREEN), /* nHeight */
+		x,                             /* X */
+		y,                             /* Y */
+		cx,                            /* nWidth */
+		cy,                            /* nHeight */
 		NULL,                          /* hWndParent */
 		NULL,                          /* hMenu */
 		hInstance,                     /* hInstance */
@@ -496,15 +502,13 @@ int WINAPI wWinMain(
 	HDC hDC = GetDC(g_hDitherWnd);
 	HDC hMemDC = CreateCompatibleDC(hDC);
 
-	int nWidth = GetDeviceCaps(hDC, HORZRES);
-	int nHeight = GetDeviceCaps(hDC, VERTRES);
 
 	HBITMAP hbOld = (HBITMAP)SelectObject(hMemDC, g_hbDesktop);
 
 	BitBlt(
 		hDC,
 		0, 0,
-		nWidth, nHeight,
+		cx, cy,
 		hMemDC,
 		0, 0,
 		SRCCOPY
@@ -516,7 +520,7 @@ int WINAPI wWinMain(
 	PatBlt(
 		hDC,
 		0, 0,
-		nWidth, nHeight,
+		cx, cy,
 		ROP_DPna
 	);
 

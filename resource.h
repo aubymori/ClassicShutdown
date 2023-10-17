@@ -18,3 +18,5 @@
 #define  IDS_STANDBY_DESC          307
 #define  IDS_LOCK                  308
 #define  IDS_LOCK_DESC             309
+
+#define  IDS_USAGE                 400

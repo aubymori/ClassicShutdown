@@ -135,9 +135,11 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="ClassicShutdown.c" />
+    <ClCompile Include="DimmedWindow.cpp" />
+    <ClCompile Include="ClassicShutdown.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="DimmedWindow.h" />
     <ClInclude Include="resource.h" />
   </ItemGroup>
   <ItemGroup>

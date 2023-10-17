@@ -2,14 +2,15 @@
 #include <lmcons.h>
 #include <powrprof.h>
 
+#include "DimmedWindow.h"
 #include "resource.h"
 
 const WCHAR CLASS_NAME[] = L"ClassicShutdown_Dither";
 
-HWND      g_hDitherWnd, g_hDlg;
+HWND      g_hDesktopWnd, g_hDlg;
 HBITMAP   g_hbDesktop, g_hbBrand;
 HINSTANCE g_hAppInstance, g_hShell32;
-BOOL      bLogoff;
+BOOL      g_bLogoff, g_bNoClose, g_bXpDim;
 
 /* Virtual screen metrics */
 int x, y, cx, cy;
@@ -90,7 +91,7 @@ void ScreenshotDesktop(void)
 	ReleaseDC(NULL, hScreenDC);
 }
 
-BOOL CALLBACK ExitWindowsDlgProc(
+INT_PTR CALLBACK ExitWindowsDlgProc(
 	HWND   hWnd,
 	UINT   uMsg,
 	WPARAM wParam,
@@ -192,6 +193,18 @@ BOOL CALLBACK ExitWindowsDlgProc(
 				WM_SETTEXT,
 				0, (LPARAM)szShutdownDesc
 			);
+
+			/* Remove close button */
+			if (g_bNoClose)
+			{
+				DWORD dwStyle = GetWindowLongPtrW(
+					hWnd, GWL_STYLE
+				);
+				dwStyle &= ~WS_SYSMENU;
+				SetWindowLongPtrW(
+					hWnd, GWL_STYLE, dwStyle
+				);
+			}
 
 			break;
 		}
@@ -331,7 +344,7 @@ BOOL CALLBACK ExitWindowsDlgProc(
 	return TRUE;
 }
 
-BOOL CALLBACK LogoffDlgProc(
+INT_PTR CALLBACK LogoffDlgProc(
 	HWND   hWnd,
 	UINT   uMsg,
 	WPARAM wParam,
@@ -413,6 +426,28 @@ int WINAPI wWinMain(
 	_In_     int       nCmdShow
 )
 {
+	/* Usage */
+	if (!wcscmp(lpCmdLine, L"/?"))
+	{
+		WCHAR szUsage[4096];
+		LoadStringW(
+			hInstance,
+			IDS_USAGE,
+			szUsage,
+			4096
+		);
+
+		MessageBoxW(
+			NULL,
+			szUsage,
+			L"ClassicShutdown",
+			MB_ICONINFORMATION
+		);
+		return 0;
+	}
+
+	CDimmedWindow *pDimmedWindow = NULL;
+
 	/* Set virtual screen metrics */
 	x = GetSystemMetrics(SM_XVIRTUALSCREEN);
 	y = GetSystemMetrics(SM_YVIRTUALSCREEN);
@@ -436,13 +471,30 @@ int WINAPI wWinMain(
 	g_hAppInstance = hInstance;
 	g_hShell32 = LoadLibraryW(L"shell32.dll");
 
-	if (0 == wcscmp(lpCmdLine, L"logoff"))
+	/* Parse command line */
+	int argc;
+	LPWSTR *argv = CommandLineToArgvW(
+		lpCmdLine, &argc
+	);
+	for (int i = 0; i < argc; i++)
 	{
-		bLogoff = TRUE;
+		if (!_wcsicmp(argv[i], L"/logoff")
+		|| !_wcsicmp(argv[i], L"logoff")) // Support old style
+		{
+			g_bLogoff = TRUE;
+		}
+		else if (!_wcsicmp(argv[i], L"/noclose"))
+		{
+			g_bNoClose = TRUE;
+		}
+		else if (!_wcsicmp(argv[i], L"/xpdim"))
+		{
+			g_bXpDim = TRUE;
+		}
 	}
-	else
+
+	if (!g_bLogoff)
 	{
-		bLogoff = FALSE;
 		HINSTANCE hBasebrd = LoadLibraryW(L"C:\\Windows\\Branding\\Basebrd\\basebrd.dll");
 		if (!hBasebrd)
 		{
@@ -465,78 +517,94 @@ int WINAPI wWinMain(
 		}
 	}
 
-	WNDCLASS wc;
-	wc.style         = 0;
-	wc.lpfnWndProc   = DitherWndProc;
-	wc.cbClsExtra    = 0;
-	wc.cbWndExtra    = 0;
-	wc.hInstance     = hInstance;
-	wc.hIcon         = NULL;
-	wc.hCursor       = LoadCursorW(NULL, IDC_ARROW);
-	wc.hbrBackground = (HBRUSH)(COLOR_3DFACE + 1);
-	wc.lpszMenuName  = NULL;
-	wc.lpszClassName = CLASS_NAME;
-	RegisterClassW(&wc);
+	if (g_bXpDim)
+	{
+		pDimmedWindow = new CDimmedWindow(hInstance);
+		if (pDimmedWindow != NULL)
+		{
+			g_hDesktopWnd = pDimmedWindow->Create();
+		}
+		else
+		{
+			MessageBoxW(NULL, L"Failed to create dim window!", L"ClassicShutdown", MB_ICONERROR);
+			return 1;
+		}
+	}
+	else
+	{
+		WNDCLASS wc;
+		wc.style = 0;
+		wc.lpfnWndProc = DitherWndProc;
+		wc.cbClsExtra = 0;
+		wc.cbWndExtra = 0;
+		wc.hInstance = hInstance;
+		wc.hIcon = NULL;
+		wc.hCursor = LoadCursorW(NULL, IDC_ARROW);
+		wc.hbrBackground = (HBRUSH)(COLOR_3DFACE + 1);
+		wc.lpszMenuName = NULL;
+		wc.lpszClassName = CLASS_NAME;
+		RegisterClassW(&wc);
 
-	g_hDitherWnd = CreateWindowExW(
-		/* To not show in taskbar: */
-		WS_EX_TOOLWINDOW,              /* dwExStyle */
-		CLASS_NAME,                    /* lpClassName */
-		L"",                           /* lpWindowName */
-		WS_POPUP,                      /* dwStyle */
-		x,                             /* X */
-		y,                             /* Y */
-		cx,                            /* nWidth */
-		cy,                            /* nHeight */
-		NULL,                          /* hWndParent */
-		NULL,                          /* hMenu */
-		hInstance,                     /* hInstance */
-		NULL                           /* lpParam */
-	);
+		g_hDesktopWnd = CreateWindowExW(
+			/* To not show in taskbar: */
+			WS_EX_TOOLWINDOW,              /* dwExStyle */
+			CLASS_NAME,                    /* lpClassName */
+			L"",                           /* lpWindowName */
+			WS_POPUP,                      /* dwStyle */
+			x,                             /* X */
+			y,                             /* Y */
+			cx,                            /* nWidth */
+			cy,                            /* nHeight */
+			NULL,                          /* hWndParent */
+			NULL,                          /* hMenu */
+			hInstance,                     /* hInstance */
+			NULL                           /* lpParam */
+		);
 
-	ScreenshotDesktop();
+		ScreenshotDesktop();
 
-	ShowWindow(g_hDitherWnd, SW_SHOW);
-	SetForegroundWindow(g_hDitherWnd);
-	
-	HDC hDC = GetDC(g_hDitherWnd);
-	HDC hMemDC = CreateCompatibleDC(hDC);
+		ShowWindow(g_hDesktopWnd, SW_SHOW);
+		SetForegroundWindow(g_hDesktopWnd);
+
+		HDC hDC = GetDC(g_hDesktopWnd);
+		HDC hMemDC = CreateCompatibleDC(hDC);
 
 
-	HBITMAP hbOld = (HBITMAP)SelectObject(hMemDC, g_hbDesktop);
+		HBITMAP hbOld = (HBITMAP)SelectObject(hMemDC, g_hbDesktop);
 
-	BitBlt(
-		hDC,
-		0, 0,
-		cx, cy,
-		hMemDC,
-		0, 0,
-		SRCCOPY
-	);
+		BitBlt(
+			hDC,
+			0, 0,
+			cx, cy,
+			hMemDC,
+			0, 0,
+			SRCCOPY
+		);
 
-	HBRUSH hbr = CreateDitheredBrush();
-	HBRUSH hbrOld = SelectObject(hDC, hbr);
+		HBRUSH hbr = CreateDitheredBrush();
+		HBRUSH hbrOld = (HBRUSH)SelectObject(hDC, hbr);
 
-	PatBlt(
-		hDC,
-		0, 0,
-		cx, cy,
-		ROP_DPna
-	);
+		PatBlt(
+			hDC,
+			0, 0,
+			cx, cy,
+			ROP_DPna
+		);
 
-	SelectObject(hDC, hbrOld);
-	DeleteObject(hbr);
+		SelectObject(hDC, hbrOld);
+		DeleteObject(hbr);
 
-	SelectObject(hMemDC, hbOld);
-	DeleteDC(hMemDC);
-	ReleaseDC(g_hDitherWnd, hDC);
+		SelectObject(hMemDC, hbOld);
+		DeleteDC(hMemDC);
+		ReleaseDC(g_hDesktopWnd, hDC);
+	}
 
-	if (bLogoff)
+	if (g_bLogoff)
 	{
 		DialogBoxParamW(
 			g_hAppInstance,
 			MAKEINTRESOURCEW(IDD_LOGOFFWINDOWS),
-			g_hDitherWnd,
+			g_hDesktopWnd,
 			LogoffDlgProc,
 			NULL
 		);
@@ -546,10 +614,15 @@ int WINAPI wWinMain(
 		DialogBoxParamW(
 			g_hAppInstance,
 			MAKEINTRESOURCEW(IDD_EXITWINDOWS),
-			g_hDitherWnd,
+			g_hDesktopWnd,
 			ExitWindowsDlgProc,
 			NULL
 		);
+	}
+
+	if (g_bXpDim && pDimmedWindow != NULL)
+	{
+		pDimmedWindow->Release();
 	}
 
 	return 0;

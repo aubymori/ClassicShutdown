@@ -41,4 +41,6 @@ STRINGTABLE
 	IDS_STANDBY_DESC  "Maintains your session, keeping the computer running on low power with data still in memory."
 	IDS_LOCK          "Lock"
 	IDS_LOCK_DESC     "Maintains your session, requiring you to log in to access your desktop again."
+	/* For some fucking reason, Microsoft decided it would be a good idea to have RC files NOT support multiline strings. Fuck you, M$. */
+	IDS_USAGE         "Usage:\n    classicshutdown [/logoff] [/noclose] [/xpdim]\n\n    /logoff:  Displays the logoff confirmation dialog.\n    /noclose:  Does not display a close button on the shutdown dialog, like Windows XP.\n    /xpdim:  Fades the screen to black and white like Windows XP rather than applying a dither effect like 2000."
 }

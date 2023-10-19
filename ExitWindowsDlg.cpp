@@ -219,7 +219,7 @@ INT_PTR CALLBACK ExitWindowsDlgProc(
                 UINT uStringId = NULL;
 
                 /* Comboboxes are zero-indexed, while SHTDN_CONSTANTS are one-indexed */
-                switch (i - 1)
+                switch (i + 1)
                 {
                     case SHTDN_LOGOFF:
                         uStringId = IDS_LOGOFF_DESC;

@@ -1,629 +1,341 @@
 #include <windows.h>
-#include <lmcons.h>
+#include <wtsapi32.h>
 #include <powrprof.h>
 
+#include "ClassicShutdown.h"
+#include "ExitWindowsDlg.h"
+#include "LogoffDlg.h"
+#include "FriendlyDlg.h"
 #include "DimmedWindow.h"
-#include "resource.h"
 
-const WCHAR CLASS_NAME[] = L"ClassicShutdown_Dither";
+const WCHAR DITHER_CLSNAME[] = L"ClassicShutdown_Dither";
 
-HWND      g_hDesktopWnd, g_hDlg;
-HBITMAP   g_hbDesktop, g_hbBrand;
-HINSTANCE g_hAppInstance, g_hShell32;
-BOOL      g_bLogoff, g_bNoClose, g_bXpDim;
+HWND          g_hDesktopWnd, g_hDlg;
+HBITMAP       g_hbDesktop;
+HINSTANCE     g_hAppInstance, g_hShell32;
+BOOL          g_bLogoff;
+SHUTDOWNSTYLE g_ssStyle;
 
 /* Virtual screen metrics */
 int x, y, cx, cy;
 
-/**
-  * From Windows 2000 source code:
-  * private\shell\shell32\restart.c
-  */
+/* Center dialog */
+void PositionDlg(HWND hDlg)
+{
+    RECT rc;
+    GetWindowRect(hDlg, &rc);
+
+    SetWindowPos(
+        hDlg,
+        HWND_TOP,
+        (GetSystemMetrics(SM_CXSCREEN) - (rc.right - rc.left)) / 2 + x,
+        (GetSystemMetrics(SM_CYSCREEN) - (rc.bottom - rc.top)) / 3 + y,
+        0, 0,
+        SWP_NOSIZE
+    );
+}
+
+void HandleShutdown(HWND hWnd, DWORD dwCode)
+{
+    switch (dwCode)
+    {
+        case SHTDN_NONE:
+            break;
+        case SHTDN_LOGOFF:
+            ExitWindowsEx(EWX_LOGOFF, 0);
+            break;
+        case SHTDN_SHUTDOWN:
+            InitiateSystemShutdownW(
+                NULL,
+                NULL,
+                0,
+                FALSE,
+                FALSE
+            );
+            break;
+        case SHTDN_RESTART:
+            ExitWindowsEx(EWX_REBOOT, 0);
+            break;
+        case SHTDN_STANDBY:
+            SetSuspendState(FALSE, TRUE, FALSE);
+            break;
+        case SHTDN_LOCK:
+            LockWorkStation();
+            break;
+        default:
+        {
+            WCHAR msg[256];
+            wsprintfW(msg, L"Invalid result %d received", dwCode);
+            MessageBoxW(NULL, msg, L"ClassicShutdown", MB_ICONERROR);
+        }
+    }
+
+    EndDialog(hWnd, 0);
+}
+
 const WORD GRAY_BITS[] = { 0x5555, 0xAAAA, 0x5555, 0xAAAA, 0x5555, 0xAAAA, 0x5555, 0xAAAA };
 
 #define  ROP_DPna  0x000A0329
 
 HBRUSH CreateDitheredBrush(void)
 {
-	HBITMAP hBmp = CreateBitmap(8, 8, 1, 1, GRAY_BITS);
-	HBRUSH hbr = CreatePatternBrush(hBmp);
-	DeleteObject(hBmp);
-	return hbr;
-}
-/**
-  * End stolen code from Windows 2000
-  */
-
-/**
-  * From... get this... Windows Server 2003 source code:
-  * ds\security\gina\msgina\brand.c
-  */
-VOID MoveChildren(HWND hWnd, INT dx, INT dy)
-{
-	HWND hWndSibling;
-	RECT rc;
-
-	//
-	// walk all the children in the dialog adjusting their positions
-	// by the delta.
-	//
-
-	for (hWndSibling = GetWindow(hWnd, GW_CHILD); hWndSibling; hWndSibling = GetWindow(hWndSibling, GW_HWNDNEXT))
-	{
-		GetWindowRect(hWndSibling, &rc);
-		MapWindowPoints(NULL, GetParent(hWndSibling), (LPPOINT)&rc, 2);
-		OffsetRect(&rc, dx, dy);
-
-		SetWindowPos(hWndSibling, NULL,
-			rc.left, rc.top, 0, 0,
-			SWP_NOZORDER | SWP_NOSIZE);
-	}
-
-	//
-	// having done that then lets adjust the parent size accordingl.
-	//
-
-	GetWindowRect(hWnd, &rc);
-	MapWindowPoints(NULL, GetParent(hWnd), (LPPOINT)&rc, 2);
-
-	SetWindowPos(hWnd, NULL,
-		0, 0, (rc.right - rc.left) + dx, (rc.bottom - rc.top) + dy,
-		SWP_NOZORDER | SWP_NOMOVE);
+    HBITMAP hBmp = CreateBitmap(8, 8, 1, 1, GRAY_BITS);
+    HBRUSH hbr = CreatePatternBrush(hBmp);
+    DeleteObject(hBmp);
+    return hbr;
 }
 
 void ScreenshotDesktop(void)
 {
-	HDC hScreenDC = GetDC(NULL);
-	HDC hMemDC = CreateCompatibleDC(hScreenDC);
+    HDC hScreenDC = GetDC(NULL);
+    HDC hMemDC = CreateCompatibleDC(hScreenDC);
 
-	g_hbDesktop = CreateCompatibleBitmap(hScreenDC, cx, cy);
-	HBITMAP hbOld = (HBITMAP)SelectObject(hMemDC, g_hbDesktop);
-	BitBlt(
-		hMemDC,
-		0, 0,
-		cx, cy,
-		hScreenDC,
-		x, y,
-		SRCCOPY
-	);
+    g_hbDesktop = CreateCompatibleBitmap(hScreenDC, cx, cy);
+    HBITMAP hbOld = (HBITMAP)SelectObject(hMemDC, g_hbDesktop);
+    BitBlt(
+        hMemDC,
+        0, 0,
+        cx, cy,
+        hScreenDC,
+        x, y,
+        SRCCOPY
+    );
 
-	DeleteDC(hMemDC);
-	ReleaseDC(NULL, hScreenDC);
-}
-
-INT_PTR CALLBACK ExitWindowsDlgProc(
-	HWND   hWnd,
-	UINT   uMsg,
-	WPARAM wParam,
-	LPARAM lParam
-)
-{
-	switch (uMsg)
-	{
-		case WM_INITDIALOG:
-		{
-			HICON hShutDown = LoadIconW(
-				g_hShell32,
-				MAKEINTRESOURCEW(8240)
-			);
-
-			PostMessageW(
-				GetDlgItem(hWnd, IDD_EXITWINDOWS_ICON),
-				STM_SETICON,
-				(WPARAM)hShutDown,
-				0
-			);
-
-			/* Resize window to account for branding banner */
-			BITMAP bmBrand;
-			GetObjectW(g_hbBrand, sizeof(BITMAP), &bmBrand);
-
-			RECT rcClient;
-			GetClientRect(hWnd, &rcClient);
-			int nWidth = rcClient.right - rcClient.left;
-			int dx = 0;
-
-			if (bmBrand.bmWidth > nWidth)
-			{
-				dx = (bmBrand.bmWidth - nWidth) / 2;
-			}
-
-			MoveChildren(hWnd, dx, bmBrand.bmHeight);
-
-			/* Calculate new size (for right margin) */
-			if (dx > 0)
-			{
-				RECT rcClient;
-				GetClientRect(hWnd, &rcClient);
-
-				RECT rcDesired;
-				rcDesired.top = 0;
-				rcDesired.left = 0;
-				rcDesired.right = bmBrand.bmWidth;
-				rcDesired.bottom = rcClient.bottom - rcClient.top;
-
-				AdjustWindowRectEx(
-					&rcDesired,
-					GetWindowLongW(hWnd, GWL_STYLE),
-					FALSE,
-					GetWindowLongW(hWnd, GWL_EXSTYLE)
-				);
-
-				int nWidth = GetSystemMetrics(SM_CXSCREEN);
-				int nHeight = GetSystemMetrics(SM_CYSCREEN);
-
-				SetWindowPos(
-					hWnd,
-					NULL,
-					(nWidth / 2) - ((rcDesired.right - rcDesired.left) / 2),
-					(nHeight / 2) - ((rcDesired.bottom - rcDesired.top) / 2),
-					rcDesired.right - rcDesired.left,
-					rcDesired.bottom - rcDesired.top,
-					SWP_NOZORDER | SWP_NOACTIVATE
-				);
-			}
-
-			HWND hComboBox = GetDlgItem(hWnd, IDD_EXITWINDOWS_COMBOBOX);
-			WCHAR szLogoffFormat[64], szLogoff[300], szShutdown[64], szRestart[64], szStandby[64], szLock[64], szUsername[UNLEN + 1];
-
-			LoadStringW(g_hAppInstance, IDS_LOGOFF, szLogoffFormat, 64);
-			
-			DWORD dwSize = UNLEN + 1;
-			GetUserNameW(szUsername, &dwSize);
-
-			wsprintfW(szLogoff, szLogoffFormat, szUsername);
-
-			LoadStringW(g_hAppInstance, IDS_SHUTDOWN, szShutdown, 64);
-			LoadStringW(g_hAppInstance, IDS_RESTART, szRestart, 64);
-			LoadStringW(g_hAppInstance, IDS_STANDBY, szStandby, 64);
-			LoadStringW(g_hAppInstance, IDS_LOCK, szLock, 64);
-
-			SendMessageW(hComboBox, CB_ADDSTRING, 0, (LPARAM)szLogoff);
-			SendMessageW(hComboBox, CB_ADDSTRING, 0, (LPARAM)szShutdown);
-			SendMessageW(hComboBox, CB_ADDSTRING, 0, (LPARAM)szRestart);
-			SendMessageW(hComboBox, CB_ADDSTRING, 0, (LPARAM)szStandby);
-			SendMessageW(hComboBox, CB_ADDSTRING, 0, (LPARAM)szLock);
-			SendMessageW(hComboBox, CB_SETCURSEL, 1, 0);
-
-			WCHAR szShutdownDesc[256];
-			LoadStringW(g_hAppInstance, IDS_SHUTDOWN_DESC, szShutdownDesc, 256);
-
-			SendMessageW(
-				GetDlgItem(hWnd, IDD_EXITWINDOWS_LABEL),
-				WM_SETTEXT,
-				0, (LPARAM)szShutdownDesc
-			);
-
-			/* Remove close button */
-			if (g_bNoClose)
-			{
-				DWORD dwStyle = GetWindowLongPtrW(
-					hWnd, GWL_STYLE
-				);
-				dwStyle &= ~WS_SYSMENU;
-				SetWindowLongPtrW(
-					hWnd, GWL_STYLE, dwStyle
-				);
-			}
-
-			break;
-		}
-		case WM_PAINT:
-		{
-			PAINTSTRUCT ps;
-			HDC hDC = BeginPaint(hWnd, &ps);
-			HDC hDCMem = CreateCompatibleDC(hDC);
-
-			HBITMAP hbmOld = (HBITMAP)SelectObject(hDCMem, g_hbBrand);
-
-			BITMAP bmBrand;
-			GetObjectW(g_hbBrand, sizeof(BITMAP), &bmBrand);
-
-			BitBlt(
-				hDC,
-				0, 0,
-				bmBrand.bmWidth,
-				bmBrand.bmHeight,
-				hDCMem,
-				0, 0,
-				SRCCOPY
-			);
-
-			SelectObject(hDC, hbmOld);
-			DeleteDC(hDCMem);
-			EndPaint(hWnd, &ps);
-			break;
-		}
-		case WM_CLOSE:
-			EndDialog(hWnd, 0);
-			break;
-		case WM_COMMAND:
-			if (HIWORD(wParam) == CBN_SELCHANGE)
-			{
-				int i = SendMessageW((HWND)lParam, CB_GETCURSEL, 0, 0);
-				WCHAR szMessage[256];
-				UINT uStringId = NULL;
-				switch (i)
-				{
-					case 0:
-						uStringId = IDS_LOGOFF_DESC;
-						break;
-					case 1:
-						uStringId = IDS_SHUTDOWN_DESC;
-						break;
-					case 2:
-						uStringId = IDS_RESTART_DESC;
-						break;
-					case 3:
-						uStringId = IDS_STANDBY_DESC;
-						break;
-					case 4:
-						uStringId = IDS_LOCK_DESC;
-						break;
-				}
-
-				if (uStringId != NULL)
-				{
-					LoadStringW(g_hAppInstance, uStringId, szMessage, 256);
-					SendMessageW(
-						GetDlgItem(hWnd, IDD_EXITWINDOWS_LABEL),
-						WM_SETTEXT,
-						0, (LPARAM)szMessage
-					);
-				}
-			}
-			else
-			{
-				switch (wParam)
-				{
-					case IDOK:
-					{
-						int i = SendMessageW(
-							GetDlgItem(hWnd, IDD_EXITWINDOWS_COMBOBOX),
-							CB_GETCURSEL, 0, 0
-						);
-						switch (i)
-						{
-							/* Log off */
-							case 0:
-								ExitWindowsEx(EWX_LOGOFF, 0);
-								break;
-							/* Shut down */
-							case 1:
-								InitiateSystemShutdownW(
-									NULL,
-									NULL,
-									0,
-									FALSE,
-									FALSE
-								);
-								break;
-							/* Restart */
-							case 2:
-								ExitWindowsEx(EWX_REBOOT, 0);
-								break;
-							/* Stand by */
-							case 3:
-								SetSuspendState(FALSE, TRUE, FALSE);
-								break;
-							/* Lock */
-							case 4:
-								LockWorkStation();
-								break;
-						}
-						EndDialog(hWnd, 0);
-					}
-					case IDCANCEL:
-						EndDialog(hWnd, 0);
-						break;
-					case IDHELP:
-
-						break;
-				}
-			}
-			break;
-		/* Disable moving */
-		case WM_SYSCOMMAND:
-			if ((wParam & ~0x0F) == SC_MOVE)
-			{
-				return TRUE;
-			}
-			return FALSE;
-			break;
-		case WM_ACTIVATE:
-			if (LOWORD(wParam) == WA_INACTIVE)
-			{
-				EndDialog(hWnd, 0);
-			}
-			break;
-		default:
-			return FALSE;
-			break;
-	}
-
-	return TRUE;
-}
-
-INT_PTR CALLBACK LogoffDlgProc(
-	HWND   hWnd,
-	UINT   uMsg,
-	WPARAM wParam,
-	LPARAM lParam
-)
-{
-	switch (uMsg)
-	{
-		case WM_INITDIALOG:
-		{
-			HICON hLogoff = LoadIconW(
-				g_hShell32,
-				MAKEINTRESOURCEW(45)
-			);
-
-			PostMessageW(
-				GetDlgItem(hWnd, IDD_LOGOFFWINDOWS_ICON),
-				STM_SETICON,
-				(WPARAM)hLogoff,
-				0
-			);
-			break;
-		}
-		case WM_CLOSE:
-			EndDialog(hWnd, 0);
-			break;
-		case WM_COMMAND:
-			switch (wParam)
-			{
-				case IDOK:
-					ExitWindowsEx(EWX_LOGOFF, 0);
-				case IDCANCEL:
-					EndDialog(hWnd, 0);
-			}
-			break;
-		/* Disable moving */
-		case WM_SYSCOMMAND:
-			if ((wParam & ~0x0F) == SC_MOVE)
-			{
-				return TRUE;
-			}
-			return FALSE;
-			break;
-		case WM_ACTIVATE:
-			if (LOWORD(wParam) == WA_INACTIVE)
-			{
-				EndDialog(hWnd, 0);
-			}
-			break;
-		default:
-			return FALSE;
-			break;
-	}
-
-	return TRUE;
+    DeleteDC(hMemDC);
+    ReleaseDC(NULL, hScreenDC);
 }
 
 LRESULT CALLBACK DitherWndProc(
-	HWND   hWnd,
-	UINT   uMsg,
-	WPARAM wParam,
-	LPARAM lParam
+    HWND   hWnd,
+    UINT   uMsg,
+    WPARAM wParam,
+    LPARAM lParam
 )
 {
-	switch (uMsg)
-	{
-		/* Haha, no thanks. No clearing for me! */
-		case WM_ERASEBKGND:
-			return 0;
-		default:
-			return DefWindowProcW(hWnd, uMsg, wParam, lParam);
-	}
+    switch (uMsg)
+    {
+        /* Haha, no thanks. No clearing for me! */
+        case WM_ERASEBKGND:
+            return 0;
+        default:
+            return DefWindowProcW(hWnd, uMsg, wParam, lParam);
+    }
 }
 
 int WINAPI wWinMain(
-	_In_     HINSTANCE hInstance,
-	_In_opt_ HINSTANCE hPrevInstance,
-	_In_     LPWSTR    lpCmdLine,
-	_In_     int       nCmdShow
+    _In_     HINSTANCE hInstance,
+    _In_opt_ HINSTANCE hPrevInstance,
+    _In_     LPWSTR    lpCmdLine,
+    _In_     int       nCmdShow
 )
 {
-	/* Usage */
-	if (!wcscmp(lpCmdLine, L"/?"))
-	{
-		WCHAR szUsage[4096];
-		LoadStringW(
-			hInstance,
-			IDS_USAGE,
-			szUsage,
-			4096
-		);
+    /* Usage */
+    if (!wcscmp(lpCmdLine, L"/?"))
+    {
+        WCHAR szUsage[4096];
+        LoadStringW(
+            hInstance,
+            IDS_USAGE,
+            szUsage,
+            4096
+        );
 
-		MessageBoxW(
-			NULL,
-			szUsage,
-			L"ClassicShutdown",
-			MB_ICONINFORMATION
-		);
-		return 0;
-	}
+        MessageBoxW(
+            NULL,
+            szUsage,
+            L"ClassicShutdown",
+            MB_ICONINFORMATION
+        );
+        return 0;
+    }
 
-	CDimmedWindow *pDimmedWindow = NULL;
+    CDimmedWindow *pDimmedWindow = NULL;
 
-	/* Set virtual screen metrics */
-	x = GetSystemMetrics(SM_XVIRTUALSCREEN);
-	y = GetSystemMetrics(SM_YVIRTUALSCREEN);
-	cx = GetSystemMetrics(SM_CXVIRTUALSCREEN);
-	cy = GetSystemMetrics(SM_CYVIRTUALSCREEN);
+    /* Set virtual screen metrics */
+    x = GetSystemMetrics(SM_XVIRTUALSCREEN);
+    y = GetSystemMetrics(SM_YVIRTUALSCREEN);
+    cx = GetSystemMetrics(SM_CXVIRTUALSCREEN);
+    cy = GetSystemMetrics(SM_CYVIRTUALSCREEN);
 
-	/* Apply the needed privilege for shutting down */
-	HANDLE hToken;
-	TOKEN_PRIVILEGES tp;
-	LUID luid;
+    /* Apply the needed privilege for shutting down */
+    HANDLE hToken;
+    TOKEN_PRIVILEGES tp;
+    LUID luid;
 
-	OpenProcessToken(GetCurrentProcess(), TOKEN_ADJUST_PRIVILEGES | TOKEN_QUERY, &hToken);
-	LookupPrivilegeValueW(NULL, SE_SHUTDOWN_NAME, &luid);
+    OpenProcessToken(GetCurrentProcess(), TOKEN_ADJUST_PRIVILEGES | TOKEN_QUERY, &hToken);
+    LookupPrivilegeValueW(NULL, SE_SHUTDOWN_NAME, &luid);
 
-	tp.PrivilegeCount = 1;
-	tp.Privileges[0].Luid = luid;
-	tp.Privileges[0].Attributes = SE_PRIVILEGE_ENABLED;
+    tp.PrivilegeCount = 1;
+    tp.Privileges[0].Luid = luid;
+    tp.Privileges[0].Attributes = SE_PRIVILEGE_ENABLED;
 
-	AdjustTokenPrivileges(hToken, FALSE, &tp, sizeof(TOKEN_PRIVILEGES), NULL, NULL);
+    AdjustTokenPrivileges(hToken, FALSE, &tp, sizeof(TOKEN_PRIVILEGES), NULL, NULL);
 
-	g_hAppInstance = hInstance;
-	g_hShell32 = LoadLibraryW(L"shell32.dll");
+    g_hAppInstance = hInstance;
+    g_hShell32 = LoadLibraryW(L"shell32.dll");
 
-	/* Parse command line */
-	int argc;
-	LPWSTR *argv = CommandLineToArgvW(
-		lpCmdLine, &argc
-	);
-	for (int i = 0; i < argc; i++)
-	{
-		if (!_wcsicmp(argv[i], L"/logoff")
-		|| !_wcsicmp(argv[i], L"logoff")) // Support old style
-		{
-			g_bLogoff = TRUE;
-		}
-		else if (!_wcsicmp(argv[i], L"/noclose"))
-		{
-			g_bNoClose = TRUE;
-		}
-		else if (!_wcsicmp(argv[i], L"/xpdim"))
-		{
-			g_bXpDim = TRUE;
-		}
-	}
+    /* Parse command line */
+    int argc;
+    LPWSTR *argv = CommandLineToArgvW(
+        lpCmdLine, &argc
+    );
+    for (int i = 0; i < argc; i++)
+    {
+        if (!_wcsicmp(argv[i], L"/logoff"))
+        {
+            g_bLogoff = TRUE;
+        }
+        else if (!_wcsicmp(argv[i], L"/style"))
+        {
+            if (i + 1 != argc)
+            {
+                if (!_wcsicmp(argv[i + 1], L"classic"))
+                {
+                    g_ssStyle = SS_CLASSIC;
+                }
+                else if (!_wcsicmp(argv[i + 1], L"xpclassic"))
+                {
+                    g_ssStyle = SS_XPCLASSIC;
+                }
+                else if (!_wcsicmp(argv[i + 1], L"xp"))
+                {
+                    g_ssStyle = SS_XPFRIENDLY;
+                }
+                else
+                {
+                    MessageBoxW(
+                        NULL,
+                        L"Invalid value defined for /style parameter, defaulting to classic style.",
+                        L"ClassicShutdown",
+                        MB_ICONWARNING
+                    );
+                    g_ssStyle = SS_CLASSIC;
+                }
 
-	if (!g_bLogoff)
-	{
-		HINSTANCE hBasebrd = LoadLibraryW(L"C:\\Windows\\Branding\\Basebrd\\basebrd.dll");
-		if (!hBasebrd)
-		{
-			MessageBoxW(NULL, L"Failed to load basebrd.dll!", L"ClassicShutdown", MB_ICONERROR);
-			return 1;
-		}
+                i++;
+            }
+            else
+            {
+                MessageBoxW(
+                    NULL,
+                    L"No value defined for /style parameter, defaulting to classic style.",
+                    L"ClassicShutdown",
+                    MB_ICONWARNING
+                );
+                g_ssStyle = SS_CLASSIC;
+            }
+        }
+    }
 
-		/* The layout of basebrd.dll changed in 1607 */
-		g_hbBrand = LoadBitmapW(
-			hBasebrd,
-			MAKEINTRESOURCEW(123)
-		);
+    if (IsXP(g_ssStyle))
+    {
+        pDimmedWindow = new CDimmedWindow(hInstance);
+        if (pDimmedWindow != NULL)
+        {
+            g_hDesktopWnd = pDimmedWindow->Create();
+        }
+        else
+        {
+            MessageBoxW(NULL, L"Failed to create dim window!", L"ClassicShutdown", MB_ICONERROR);
+            return 1;
+        }
+    }
+    else
+    {
+        WNDCLASS wcDitherCls;
+        wcDitherCls.style = 0;
+        wcDitherCls.lpfnWndProc = DitherWndProc;
+        wcDitherCls.cbClsExtra = 0;
+        wcDitherCls.cbWndExtra = 0;
+        wcDitherCls.hInstance = hInstance;
+        wcDitherCls.hIcon = NULL;
+        wcDitherCls.hCursor = LoadCursorW(NULL, IDC_ARROW);
+        wcDitherCls.hbrBackground = (HBRUSH)(COLOR_3DFACE + 1);
+        wcDitherCls.lpszMenuName = NULL;
+        wcDitherCls.lpszClassName = DITHER_CLSNAME;
+        RegisterClassW(&wcDitherCls);
 
-		if (!g_hbBrand)
-		{
-			g_hbBrand = LoadBitmapW(
-				hBasebrd,
-				MAKEINTRESOURCEW(121)
-			);
-		}
-	}
+        g_hDesktopWnd = CreateWindowExW(
+            /* To not show in taskbar: */
+            WS_EX_TOOLWINDOW,              /* dwExStyle */
+            DITHER_CLSNAME,                /* lpClassName */
+            L"",                           /* lpWindowName */
+            WS_POPUP,                      /* dwStyle */
+            x,                             /* X */
+            y,                             /* Y */
+            cx,                            /* nWidth */
+            cy,                            /* nHeight */
+            NULL,                          /* hWndParent */
+            NULL,                          /* hMenu */
+            hInstance,                     /* hInstance */
+            NULL                           /* lpParam */
+        );
 
-	if (g_bXpDim)
-	{
-		pDimmedWindow = new CDimmedWindow(hInstance);
-		if (pDimmedWindow != NULL)
-		{
-			g_hDesktopWnd = pDimmedWindow->Create();
-		}
-		else
-		{
-			MessageBoxW(NULL, L"Failed to create dim window!", L"ClassicShutdown", MB_ICONERROR);
-			return 1;
-		}
-	}
-	else
-	{
-		WNDCLASS wc;
-		wc.style = 0;
-		wc.lpfnWndProc = DitherWndProc;
-		wc.cbClsExtra = 0;
-		wc.cbWndExtra = 0;
-		wc.hInstance = hInstance;
-		wc.hIcon = NULL;
-		wc.hCursor = LoadCursorW(NULL, IDC_ARROW);
-		wc.hbrBackground = (HBRUSH)(COLOR_3DFACE + 1);
-		wc.lpszMenuName = NULL;
-		wc.lpszClassName = CLASS_NAME;
-		RegisterClassW(&wc);
+        ScreenshotDesktop();
 
-		g_hDesktopWnd = CreateWindowExW(
-			/* To not show in taskbar: */
-			WS_EX_TOOLWINDOW,              /* dwExStyle */
-			CLASS_NAME,                    /* lpClassName */
-			L"",                           /* lpWindowName */
-			WS_POPUP,                      /* dwStyle */
-			x,                             /* X */
-			y,                             /* Y */
-			cx,                            /* nWidth */
-			cy,                            /* nHeight */
-			NULL,                          /* hWndParent */
-			NULL,                          /* hMenu */
-			hInstance,                     /* hInstance */
-			NULL                           /* lpParam */
-		);
+        ShowWindow(g_hDesktopWnd, SW_SHOW);
+        SetForegroundWindow(g_hDesktopWnd);
 
-		ScreenshotDesktop();
+        HDC hDC = GetDC(g_hDesktopWnd);
+        HDC hMemDC = CreateCompatibleDC(hDC);
 
-		ShowWindow(g_hDesktopWnd, SW_SHOW);
-		SetForegroundWindow(g_hDesktopWnd);
+        HBITMAP hbOld = (HBITMAP)SelectObject(hMemDC, g_hbDesktop);
 
-		HDC hDC = GetDC(g_hDesktopWnd);
-		HDC hMemDC = CreateCompatibleDC(hDC);
+        BitBlt(
+            hDC,
+            0, 0,
+            cx, cy,
+            hMemDC,
+            0, 0,
+            SRCCOPY
+        );
 
+        HBRUSH hbr = CreateDitheredBrush();
+        HBRUSH hbrOld = (HBRUSH)SelectObject(hDC, hbr);
 
-		HBITMAP hbOld = (HBITMAP)SelectObject(hMemDC, g_hbDesktop);
+        PatBlt(
+            hDC,
+            0, 0,
+            cx, cy,
+            ROP_DPna
+        );
 
-		BitBlt(
-			hDC,
-			0, 0,
-			cx, cy,
-			hMemDC,
-			0, 0,
-			SRCCOPY
-		);
+        SelectObject(hDC, hbrOld);
+        DeleteObject(hbr);
 
-		HBRUSH hbr = CreateDitheredBrush();
-		HBRUSH hbrOld = (HBRUSH)SelectObject(hDC, hbr);
+        SelectObject(hMemDC, hbOld);
+        DeleteDC(hMemDC);
+        ReleaseDC(g_hDesktopWnd, hDC);
+    }
 
-		PatBlt(
-			hDC,
-			0, 0,
-			cx, cy,
-			ROP_DPna
-		);
+    UINT    uDlgId;
+    DLGPROC pDlgProc;
 
-		SelectObject(hDC, hbrOld);
-		DeleteObject(hbr);
+    if (g_ssStyle == SS_XPFRIENDLY)
+    {
+        uDlgId = g_bLogoff ? IDD_LOGOFFWINDOWS_FRIENDLY : IDD_EXITWINDOWS_FRIENDLY;
+        pDlgProc = FriendlyDlgProc;
+    }
+    else
+    {
+        uDlgId = g_bLogoff ? IDD_LOGOFFWINDOWS : IDD_EXITWINDOWS;
+        pDlgProc = g_bLogoff ? LogoffDlgProc : ExitWindowsDlgProc;
+    }
 
-		SelectObject(hMemDC, hbOld);
-		DeleteDC(hMemDC);
-		ReleaseDC(g_hDesktopWnd, hDC);
-	}
+    /* DialogBoxParam is a fucking piece of shit and doesn't return the right value,
+       so use a global var instead lol*/
+    DialogBoxParamW(
+        g_hAppInstance,
+        MAKEINTRESOURCEW(uDlgId),
+        g_hDesktopWnd,
+        pDlgProc,
+        NULL
+    );
 
-	if (g_bLogoff)
-	{
-		DialogBoxParamW(
-			g_hAppInstance,
-			MAKEINTRESOURCEW(IDD_LOGOFFWINDOWS),
-			g_hDesktopWnd,
-			LogoffDlgProc,
-			NULL
-		);
-	}
-	else
-	{
-		DialogBoxParamW(
-			g_hAppInstance,
-			MAKEINTRESOURCEW(IDD_EXITWINDOWS),
-			g_hDesktopWnd,
-			ExitWindowsDlgProc,
-			NULL
-		);
-	}
+    if (pDimmedWindow != NULL)
+    {
+        pDimmedWindow->Release();
+    }
 
-	if (g_bXpDim && pDimmedWindow != NULL)
-	{
-		pDimmedWindow->Release();
-	}
-
-	return 0;
+    return 0;
 }

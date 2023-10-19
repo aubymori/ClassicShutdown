@@ -1,31 +1,37 @@
 # ClassicShutdown
-ClassicShutdown brings the shutdown dialog from Windows 2000 to modern versions of Windows, dither effect and all!
-
-## Preview
-
-![Shutdown dialog](images/shutdown-dialog.png)
+ClassicShutdown brings the shutdown dialog from Windows 2000 and Windows XP to modern versions of Windows.
 
 ## Usage
 
 ```
-classicshutdown [/logoff] [/noclose] [/xpdim]
+classicshutdown [/logoff] [/style classic | xpclassic | xp]
 ```
 
-### `/logoff`
+## `/logoff`
 
 Displays the logoff confirmation dialog.
 
-![Logoff dialog](images/logoff-dialog.png)
+## `/style`
 
-### `/noclose`
+Specifies which style of shutdown screen to use.
 
-Does not display a close button on the shutdown dialog, like Windows XP.
+### `classic`
 
-![Shutdown dialog, no close button](images/shutdown-noclose.png)
+Windows 2000 style This is the default if a style is not specified.
 
+<img alt="Windows 2000 style shutdown dialog" src="images/shutdown-dialog.png" width="512">
+<img alt="Windows 2000 style logoff dialog" src="images/logoff-dialog.png" width="512">
 
-### `/xpdim`
+### `xpclassic`
 
-Fades the screen to black and white like Windows XP rather than applying a dither effect like 2000.
+Windows XP with Welcome screen disabled style.
 
-![Shutdown dialog, black and white background](images/shutdown-xpdim.png)
+<img alt="Windows XP classic style shutdown dialog" src="images/shutdown-xpclassic.png" width="512">
+<img alt="Windows XP classic style logoff dialog" src="images/logoff-xpclassic.png" width="512">
+
+### `xp`
+
+Windows XP style.
+
+<img alt="Windows XP style shutdown dialog" src="images/shutdown-xp.png" width="512">
+<img alt="Windows XP style logoff dialog" src="images/logoff-xp.png" width="512">

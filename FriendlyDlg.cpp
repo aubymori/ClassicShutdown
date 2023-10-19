@@ -106,7 +106,7 @@ void FilterMetaCharacters(WCHAR *pszText)
     }
 }
 
-LRESULT BtnSubclassProc(
+LRESULT CALLBACK BtnSubclassProc(
     HWND      hWnd,
     UINT      uMsg,
     WPARAM    wParam,

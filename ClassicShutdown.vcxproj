@@ -82,6 +82,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalManifestDependencies>"type='win32' name='Microsoft.Windows.Common-Controls' version='6.0.0.0' processorArchitecture='*' publicKeyToken='6595b64144ccf1df' language='*'";%(AdditionalManifestDependencies)</AdditionalManifestDependencies>
       <AdditionalDependencies>gdi32.lib;msimg32.lib;powrprof.lib;wtsapi32.lib;comctl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <MinimumRequiredVersion>5.0</MinimumRequiredVersion>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -100,6 +101,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalManifestDependencies>"type='win32' name='Microsoft.Windows.Common-Controls' version='6.0.0.0' processorArchitecture='*' publicKeyToken='6595b64144ccf1df' language='*'";%(AdditionalManifestDependencies)</AdditionalManifestDependencies>
       <AdditionalDependencies>gdi32.lib;msimg32.lib;powrprof.lib;wtsapi32.lib;comctl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <MinimumRequiredVersion>5.0</MinimumRequiredVersion>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -114,6 +116,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalManifestDependencies>"type='win32' name='Microsoft.Windows.Common-Controls' version='6.0.0.0' processorArchitecture='*' publicKeyToken='6595b64144ccf1df' language='*'";%(AdditionalManifestDependencies)</AdditionalManifestDependencies>
       <AdditionalDependencies>gdi32.lib;msimg32.lib;powrprof.lib;wtsapi32.lib;comctl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <MinimumRequiredVersion>5.0</MinimumRequiredVersion>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -132,6 +135,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalManifestDependencies>"type='win32' name='Microsoft.Windows.Common-Controls' version='6.0.0.0' processorArchitecture='*' publicKeyToken='6595b64144ccf1df' language='*'";%(AdditionalManifestDependencies)</AdditionalManifestDependencies>
       <AdditionalDependencies>gdi32.lib;msimg32.lib;powrprof.lib;wtsapi32.lib;comctl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <MinimumRequiredVersion>5.0</MinimumRequiredVersion>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>

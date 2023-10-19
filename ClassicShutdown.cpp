@@ -129,6 +129,15 @@ int WINAPI wWinMain(
     _In_     int       nCmdShow
 )
 {
+    /* Nuke Open-Shell fader if it exists,
+       and simulate start menu delay */
+    HWND hFader = FindWindowW(L"OpenShell.CMenuFader", NULL);
+    if (hFader)
+    {
+        Sleep(100);
+        ShowWindow(hFader, SW_HIDE);
+    }
+
     /* Usage */
     if (!wcscmp(lpCmdLine, L"/?"))
     {

@@ -65,7 +65,6 @@ CDimmedWindow::CDimmedWindow (HINSTANCE hInstance) :
     _hInstance(hInstance),
     _atom(0),
     _hwnd(NULL),
-    _fDithered(false),
     _pvPixels(NULL),
     _idxChunk(0),
     _idxSaturation(0),
@@ -241,121 +240,10 @@ HWND    CDimmedWindow::Create (void)
             ShowWindow(_hwnd, SW_SHOW);
             SetForegroundWindow(_hwnd);
 
-            // For beta: Always use a dither
-            // if ((GetLowestScreenBitDepth() <= 8) || !IsDimScreen())
-            {
-                _fDithered = true;
-            }
             EnableWindow(_hwnd, FALSE);
         }
     }
     return(_hwnd);
-}
-
-//  --------------------------------------------------------------------------
-//  CDimmedWindow::GetLowestScreenBitDepth
-//
-//  Arguments:  <none>
-//
-//  Returns:    int
-//
-//  Purpose:    Iterates the display devices looking the display with the
-//              lowest bit depth.
-//
-//  History:    2000-05-22  vtan        created
-//  --------------------------------------------------------------------------
-
-int     CDimmedWindow::GetLowestScreenBitDepth (void)  const
-
-{
-    enum
-    {
-        INITIAL_VALUE   =   256
-    };
-
-    BOOL            fResult;
-    int             iLowestScreenBitDepth, iDeviceNumber;
-    DISPLAY_DEVICEW displayDevice;
-
-    iLowestScreenBitDepth = INITIAL_VALUE;     //  Start at beyond 32-bit depth.
-    iDeviceNumber = 0;
-    displayDevice.cb = sizeof(displayDevice);
-    fResult = EnumDisplayDevicesW(NULL, iDeviceNumber, &displayDevice, 0);
-    while (fResult != FALSE)
-    {
-        if ((displayDevice.StateFlags & DISPLAY_DEVICE_ATTACHED_TO_DESKTOP) != 0)
-        {
-            HDC     hdcDisplay;
-
-            hdcDisplay = CreateDC(displayDevice.DeviceName, displayDevice.DeviceName, NULL, NULL);
-            if (hdcDisplay != NULL)
-            {
-                int     iResult;
-
-                iResult = GetDeviceCaps(hdcDisplay, BITSPIXEL);
-                if (iResult < iLowestScreenBitDepth)
-                {
-                    iLowestScreenBitDepth = iResult;
-                }
-                DeleteDC(hdcDisplay);
-            }
-        }
-        displayDevice.cb = sizeof(displayDevice);
-        fResult = EnumDisplayDevices(NULL, ++iDeviceNumber, &displayDevice, 0);
-    }
-    if (INITIAL_VALUE == iLowestScreenBitDepth)
-    {
-        iLowestScreenBitDepth = 8;
-    }
-    return(iLowestScreenBitDepth);
-}
-
-//  --------------------------------------------------------------------------
-//  CDimmedWindow::IsForcedDimScreen
-//
-//  Arguments:  <none>
-//
-//  Returns:    bool
-//
-//  Purpose:    Returns whether the force override of dimming is set on this
-//              user or this machine. Check the local machine first. Then
-//              check the user setting. Then check the user policy. Then
-//              check the local machine policy.
-//
-//  History:    2000-05-23  vtan        created
-//  --------------------------------------------------------------------------
-
-bool    CDimmedWindow::IsForcedDimScreen (void)        const
-
-{
-    return true;
-}
-
-//  --------------------------------------------------------------------------
-//  CDimmedWindow::IsDimScreen
-//
-//  Arguments:  <none>
-//
-//  Returns:    bool
-//
-//  Purpose:    Returns whether the screen should be dimmed. If not then the
-//              screen will be dithered instead which is a cheaper operation
-//              by doesn't look as nice.
-//
-//              1) If UI effects are disabled then don't ever dim.
-//              2) Dim if screen area is small enough OR forced to dim.
-//
-//  History:    2000-05-23  vtan        created
-//  --------------------------------------------------------------------------
-
-bool    CDimmedWindow::IsDimScreen (void)              const
-
-{
-    bool    fIsUIEffectsActive;
-    BOOL    fTemp;
-
-    fIsUIEffectsActive = (SystemParametersInfo(SPI_GETUIEFFECTS, 0, &fTemp, 0) != FALSE) && (fTemp != FALSE);
-    return(fIsUIEffectsActive && IsForcedDimScreen());
 }
 
 
@@ -441,40 +329,6 @@ void CDimmedWindow::SetupDim()
     }
 }
 
-void    CDimmedWindow::Dither()
-
-{
-    static  const WORD  s_dwGrayBits[]  =
-    {
-        0x5555, 0xAAAA, 0x5555, 0xAAAA, 0x5555, 0xAAAA, 0x5555, 0xAAAA
-    };
-
-    HDC hdcWindow = GetDC(_hwnd);
-    if (hdcWindow != NULL)
-    {
-        HBITMAP hbmDimmed = CreateBitmap(8, 8, 1, 1, s_dwGrayBits);
-        if (hbmDimmed != NULL)
-        {
-            HBRUSH hbrDimmed = CreatePatternBrush(hbmDimmed);
-            if (hbrDimmed != NULL)
-            {
-                static  const int   ROP_DPna    =   0x000A0329;
-
-                RECT    rc;
-                HBRUSH  hbrSelected = static_cast<HBRUSH>(SelectObject(hdcWindow, hbrDimmed));
-                GetClientRect(_hwnd, &rc);
-                PatBlt(hdcWindow, rc.left, rc.top, rc.right - rc.left, rc.bottom - rc.top, ROP_DPna);
-                SelectObject(hdcWindow, hbrSelected);
-
-                DeleteObject(hbrDimmed);
-            }
-
-            DeleteObject(hbmDimmed);
-        }
-        ReleaseDC(_hwnd, hdcWindow);
-    }
-}
-
 
 //  --------------------------------------------------------------------------
 //  CDimmedWindow::WndProc
@@ -506,15 +360,10 @@ LRESULT     CALLBACK    CDimmedWindow::WndProc (HWND hwnd, UINT uMsg, WPARAM wPa
             pThis = reinterpret_cast<CDimmedWindow*>(pCreateStruct->lpCreateParams);
             (LONG_PTR)SetWindowLongPtr(hwnd, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(pThis));
             lResult = 0;
-            if (pThis->_fDithered)
-                pThis->Dither();
-            else
+            pThis->SetupDim();
+            if (pThis->_hdcDimmed)
             {
-                pThis->SetupDim();
-                if (pThis->_hdcDimmed)
-                {
-                    SetTimer(hwnd, 1, 30, NULL);
-                }
+                SetTimer(hwnd, 1, 30, NULL);
             }
             break;
         }

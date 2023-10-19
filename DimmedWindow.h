@@ -43,11 +43,6 @@ class   CDimmedWindow : public IUnknown
                 HWND                        Create (void);
                 void                        SetupDim();
                 BOOL                        StepDim();
-                void                        Dither();
-    private:
-                int                         GetLowestScreenBitDepth (void)  const;
-                bool                        IsForcedDimScreen (void)        const;
-                bool                        IsDimScreen (void)              const;
 
 
         static  LRESULT     CALLBACK        WndProc (HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
@@ -60,7 +55,6 @@ class   CDimmedWindow : public IUnknown
                                             _yVirtualScreen,
                                             _cxVirtualScreen,
                                             _cyVirtualScreen;
-                bool                        _fDithered;
                 HDC                         _hdcDimmed;
                 HBITMAP                     _hbmOldDimmed;
                 HBITMAP                     _hbmDimmed;

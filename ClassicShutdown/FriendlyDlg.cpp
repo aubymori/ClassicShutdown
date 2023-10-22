@@ -209,7 +209,7 @@ LRESULT CALLBACK BtnSubclassProc(
                         TOOLINFOW ti = { 0 };
                         WCHAR     szText[256];
                         LoadStringW(
-                            g_hAppInstance,
+                            g_hMuiInstance,
                             iTxtId,
                             szText + 2,
                             252
@@ -318,7 +318,7 @@ INT_PTR CALLBACK FriendlyDlgProc(
 
             /* Title font */
             if (LoadStringA(
-                g_hAppInstance,
+                g_hMuiInstance,
                 IDS_TURNOFF_TITLE_FACESIZE,
                 szPixelSize,
                 10
@@ -326,7 +326,7 @@ INT_PTR CALLBACK FriendlyDlgProc(
             {
                 lf.lfHeight = -MulDiv(atoi(szPixelSize), GetDeviceCaps(hDCScreen, LOGPIXELSY), 72);
                 if (LoadStringW(
-                    g_hAppInstance,
+                    g_hMuiInstance,
                     IDS_TURNOFF_TITLE_FACENAME,
                     lf.lfFaceName,
                     LF_FACESIZE
@@ -342,7 +342,7 @@ INT_PTR CALLBACK FriendlyDlgProc(
 
             /* Button font */
             if (LoadStringA(
-                g_hAppInstance,
+                g_hMuiInstance,
                 IDS_TURNOFF_BUTTON_FACESIZE,
                 szPixelSize,
                 10
@@ -350,7 +350,7 @@ INT_PTR CALLBACK FriendlyDlgProc(
             {
                 lf.lfHeight = -MulDiv(atoi(szPixelSize), GetDeviceCaps(hDCScreen, LOGPIXELSY), 72);
                 if (LoadStringW(
-                    g_hAppInstance,
+                    g_hMuiInstance,
                     IDS_TURNOFF_BUTTON_FACENAME,
                     lf.lfFaceName,
                     LF_FACESIZE

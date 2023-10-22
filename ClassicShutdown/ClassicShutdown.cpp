@@ -1,6 +1,7 @@
 #include <windows.h>
 #include <wtsapi32.h>
 #include <powrprof.h>
+#include <winnls.h>
 
 #include "ClassicShutdown.h"
 #include "ExitWindowsDlg.h"
@@ -12,7 +13,7 @@ const WCHAR DITHER_CLSNAME[] = L"ClassicShutdown_Dither";
 
 HWND          g_hDesktopWnd, g_hDlg;
 HBITMAP       g_hbDesktop;
-HINSTANCE     g_hAppInstance, g_hShell32;
+HINSTANCE     g_hAppInstance, g_hMuiInstance, g_hShell32;
 BOOL          g_bLogoff;
 SHUTDOWNSTYLE g_ssStyle;
 
@@ -138,24 +139,63 @@ int WINAPI wWinMain(
         ShowWindow(hFader, SW_HIDE);
     }
 
-    /* Usage */
-    if (!wcscmp(lpCmdLine, L"/?"))
+    /**
+      * Load MUI
+      * We have to do this manually because the built-in
+      * LoadMUILibraryW function doesn't support EXEs,
+      * only 
+      */
+    WCHAR szPath[MAX_PATH], szMuiPath[MAX_PATH];
+    g_hAppInstance = hInstance;
+    if (!GetModuleFileNameW(
+        g_hAppInstance,
+        szPath,
+        MAX_PATH
+    ))
     {
-        WCHAR szUsage[4096];
-        LoadStringW(
-            hInstance,
-            IDS_USAGE,
-            szUsage,
-            4096
+        return 1;
+    }
+
+    /* Last backslash */
+    WCHAR *pBackslash = wcsrchr(szPath, L'\\');
+    WCHAR szLocale[LOCALE_NAME_MAX_LENGTH];
+
+    GetUserDefaultLocaleName(
+        szLocale,
+        LOCALE_NAME_MAX_LENGTH
+    );
+
+    *pBackslash = L'\0';
+    wsprintfW(
+        szMuiPath,
+        L"%s\\%s\\%s.mui",
+        szPath,
+        szLocale,
+        pBackslash + 1
+    );
+
+    g_hMuiInstance = LoadLibraryW(szMuiPath);
+    if (!g_hMuiInstance)
+    {
+        /* Load en-US as fallback */
+        wsprintfW(
+            szMuiPath,
+            L"%s\\%s\\%s.mui",
+            szPath,
+            L"en-US",
+            pBackslash + 1
         );
 
-        MessageBoxW(
-            NULL,
-            szUsage,
-            L"ClassicShutdown",
-            MB_ICONINFORMATION
-        );
-        return 0;
+        g_hMuiInstance = LoadLibraryW(szMuiPath);
+        if (!g_hMuiInstance)
+        {
+            MessageBoxW(
+                NULL,
+                L"Failed to load language resources.\n\nMost likely, you did not copy over files properly.",
+                L"ClassicShutdown",
+                MB_ICONERROR
+            );
+        }
     }
 
     CDimmedWindow *pDimmedWindow = NULL;
@@ -180,7 +220,7 @@ int WINAPI wWinMain(
 
     AdjustTokenPrivileges(hToken, FALSE, &tp, sizeof(TOKEN_PRIVILEGES), NULL, NULL);
 
-    g_hAppInstance = hInstance;
+    
     g_hShell32 = LoadLibraryW(L"shell32.dll");
 
     /* Parse command line */
@@ -331,10 +371,8 @@ int WINAPI wWinMain(
         pDlgProc = g_bLogoff ? LogoffDlgProc : ExitWindowsDlgProc;
     }
 
-    /* DialogBoxParam is a fucking piece of shit and doesn't return the right value,
-       so use a global var instead lol*/
     DialogBoxParamW(
-        g_hAppInstance,
+        g_hMuiInstance,
         MAKEINTRESOURCEW(uDlgId),
         g_hDesktopWnd,
         pDlgProc,
@@ -344,6 +382,11 @@ int WINAPI wWinMain(
     if (pDimmedWindow != NULL)
     {
         pDimmedWindow->Release();
+    }
+
+    if (g_hMuiInstance)
+    {
+        FreeLibrary(g_hMuiInstance);
     }
 
     return 0;

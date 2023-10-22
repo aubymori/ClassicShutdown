@@ -29,7 +29,7 @@ INT_PTR CALLBACK LogoffDlgProc(
                 WCHAR szBuffer[256];
 
                 LoadStringW(
-                    g_hAppInstance,
+                    g_hMuiInstance,
                     IDS_LOGOFF_BTN,
                     szBuffer,
                     256
@@ -41,7 +41,7 @@ INT_PTR CALLBACK LogoffDlgProc(
                 );
 
                 LoadStringW(
-                    g_hAppInstance,
+                    g_hMuiInstance,
                     IDS_CANCEL_BTN,
                     szBuffer,
                     256

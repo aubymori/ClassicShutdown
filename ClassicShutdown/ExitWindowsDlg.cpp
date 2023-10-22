@@ -137,17 +137,17 @@ INT_PTR CALLBACK ExitWindowsDlgProc(
             HWND hComboBox = GetDlgItem(hWnd, IDD_EXITWINDOWS_COMBOBOX);
             WCHAR szLogoffFormat[64], szLogoff[300], szShutdown[64], szRestart[64], szStandby[64], szLock[64], szUsername[UNLEN + 1];
 
-            LoadStringW(g_hAppInstance, IDS_LOGOFF, szLogoffFormat, 64);
+            LoadStringW(g_hMuiInstance, IDS_LOGOFF, szLogoffFormat, 64);
 
             DWORD dwSize = UNLEN + 1;
             GetUserNameW(szUsername, &dwSize);
 
             wsprintfW(szLogoff, szLogoffFormat, szUsername);
 
-            LoadStringW(g_hAppInstance, IDS_SHUTDOWN, szShutdown, 64);
-            LoadStringW(g_hAppInstance, IDS_RESTART, szRestart, 64);
-            LoadStringW(g_hAppInstance, IDS_STANDBY, szStandby, 64);
-            LoadStringW(g_hAppInstance, IDS_LOCK, szLock, 64);
+            LoadStringW(g_hMuiInstance, IDS_SHUTDOWN, szShutdown, 64);
+            LoadStringW(g_hMuiInstance, IDS_RESTART, szRestart, 64);
+            LoadStringW(g_hMuiInstance, IDS_STANDBY, szStandby, 64);
+            LoadStringW(g_hMuiInstance, IDS_LOCK, szLock, 64);
 
             SendMessageW(hComboBox, CB_ADDSTRING, 0, (LPARAM)szLogoff);
             SendMessageW(hComboBox, CB_ADDSTRING, 0, (LPARAM)szShutdown);
@@ -157,7 +157,7 @@ INT_PTR CALLBACK ExitWindowsDlgProc(
             SendMessageW(hComboBox, CB_SETCURSEL, 1, 0);
 
             WCHAR szShutdownDesc[256];
-            LoadStringW(g_hAppInstance, IDS_SHUTDOWN_DESC, szShutdownDesc, 256);
+            LoadStringW(g_hMuiInstance, IDS_SHUTDOWN_DESC, szShutdownDesc, 256);
 
             SendMessageW(
                 GetDlgItem(hWnd, IDD_EXITWINDOWS_LABEL),
@@ -240,7 +240,7 @@ INT_PTR CALLBACK ExitWindowsDlgProc(
 
                 if (uStringId != NULL)
                 {
-                    LoadStringW(g_hAppInstance, uStringId, szMessage, 256);
+                    LoadStringW(g_hMuiInstance, uStringId, szMessage, 256);
                     SendMessageW(
                         GetDlgItem(hWnd, IDD_EXITWINDOWS_LABEL),
                         WM_SETTEXT,

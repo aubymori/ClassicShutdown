@@ -23,8 +23,6 @@
 #define  IDS_LOGOFF_BTN            310
 #define  IDS_CANCEL_BTN            311
 
-#define  IDS_USAGE                 399
-
 /* XP Friendly */
 #define IDD_LOGOFFWINDOWS_FRIENDLY                   1089
 

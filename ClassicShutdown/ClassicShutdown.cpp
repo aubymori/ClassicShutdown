@@ -8,6 +8,7 @@
 #include "LogoffDlg.h"
 #include "FriendlyDlg.h"
 #include "DimmedWindow.h"
+#include "mui.h"
 
 const WCHAR DITHER_CLSNAME[] = L"ClassicShutdown_Dither";
 
@@ -139,63 +140,18 @@ int WINAPI wWinMain(
         ShowWindow(hFader, SW_HIDE);
     }
 
-    /**
-      * Load MUI
-      * We have to do this manually because the built-in
-      * LoadMUILibraryW function doesn't support EXEs,
-      * only 
-      */
-    WCHAR szPath[MAX_PATH], szMuiPath[MAX_PATH];
+    /* Set up HINSTANCEs */
     g_hAppInstance = hInstance;
-    if (!GetModuleFileNameW(
-        g_hAppInstance,
-        szPath,
-        MAX_PATH
-    ))
-    {
-        return 1;
-    }
-
-    /* Last backslash */
-    WCHAR *pBackslash = wcsrchr(szPath, L'\\');
-    WCHAR szLocale[LOCALE_NAME_MAX_LENGTH];
-
-    GetUserDefaultLocaleName(
-        szLocale,
-        LOCALE_NAME_MAX_LENGTH
-    );
-
-    *pBackslash = L'\0';
-    wsprintfW(
-        szMuiPath,
-        L"%s\\%s\\%s.mui",
-        szPath,
-        szLocale,
-        pBackslash + 1
-    );
-
-    g_hMuiInstance = LoadLibraryW(szMuiPath);
+    g_hMuiInstance = GetMUIModule(g_hAppInstance);
     if (!g_hMuiInstance)
     {
-        /* Load en-US as fallback */
-        wsprintfW(
-            szMuiPath,
-            L"%s\\%s\\%s.mui",
-            szPath,
-            L"en-US",
-            pBackslash + 1
+        MessageBoxW(
+            NULL,
+            L"Failed to load language resources.\n\nMost likely, you did not copy over files properly.",
+            L"ClassicShutdown",
+            MB_ICONERROR
         );
-
-        g_hMuiInstance = LoadLibraryW(szMuiPath);
-        if (!g_hMuiInstance)
-        {
-            MessageBoxW(
-                NULL,
-                L"Failed to load language resources.\n\nMost likely, you did not copy over files properly.",
-                L"ClassicShutdown",
-                MB_ICONERROR
-            );
-        }
+        return 1;
     }
 
     CDimmedWindow *pDimmedWindow = NULL;

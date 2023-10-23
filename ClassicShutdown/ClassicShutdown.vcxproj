@@ -161,12 +161,14 @@
     <ClCompile Include="FriendlyDlg.cpp" />
     <ClCompile Include="FriendlyDlg.h" />
     <ClCompile Include="LogoffDlg.cpp" />
+    <ClCompile Include="mui.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ClassicShutdown.h" />
     <ClInclude Include="DimmedWindow.h" />
     <ClInclude Include="ExitWindowsDlg.h" />
     <ClInclude Include="LogoffDlg.h" />
+    <ClInclude Include="mui.h" />
     <ClInclude Include="resource.h" />
   </ItemGroup>
   <ItemGroup>

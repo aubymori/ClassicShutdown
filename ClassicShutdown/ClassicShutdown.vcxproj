@@ -161,7 +161,7 @@
     <ClCompile Include="FriendlyDlg.cpp" />
     <ClCompile Include="FriendlyDlg.h" />
     <ClCompile Include="LogoffDlg.cpp" />
-    <ClCompile Include="mui.cpp" />
+    <ClCompile Include="mui.c" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ClassicShutdown.h" />

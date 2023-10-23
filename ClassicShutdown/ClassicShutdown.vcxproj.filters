@@ -33,7 +33,7 @@
     <ClCompile Include="FriendlyDlg.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="mui.cpp">
+    <ClCompile Include="mui.c">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

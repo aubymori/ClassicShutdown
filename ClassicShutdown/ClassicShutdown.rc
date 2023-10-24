@@ -1,6 +1,8 @@
 #include <windows.h>
 #include "resource.h"
 
+LANGUAGE LANG_NEUTRAL, SUBLANG_DEFAULT
+
 IDI_CLASSICSHUTDOWN ICON "ClassicShutdown.ico"
 
 IDB_BACKGROUND                  BITMAP  DISCARDABLE     "res\\to_background.bmp"

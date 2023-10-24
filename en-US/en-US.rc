@@ -1,6 +1,8 @@
 #include <windows.h>
 #include "..\ClassicShutdown\resource.h"
 
+LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
+
 /* Main (classic) */
 IDD_EXITWINDOWS DIALOG 0, 0, 274, 103
 STYLE DS_SHELLFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU

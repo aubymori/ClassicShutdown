@@ -24,6 +24,10 @@ void HandleShutdown(HWND hWnd, DWORD dwCode);
 
 #define IsXP(ss)  (ss == SS_XPCLASSIC | ss == SS_XPFRIENDLY)
 
+#define ERRORANDQUIT(msg)                                 \
+MessageBoxW(NULL, msg, L"ClassicShutdown", MB_ICONERROR); \
+return 1;
+
 #define SHTDN_NONE        0
 #define SHTDN_LOGOFF      1
 #define SHTDN_SHUTDOWN    2

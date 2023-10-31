@@ -145,13 +145,9 @@ int WINAPI wWinMain(
     g_hMuiInstance = GetMUIModule(g_hAppInstance);
     if (!g_hMuiInstance)
     {
-        MessageBoxW(
-            NULL,
-            L"Failed to load language resources.\n\nMost likely, you did not copy over files properly.",
-            L"ClassicShutdown",
-            MB_ICONERROR
+        ERRORANDQUIT(
+            L"Failed to load language resources.\n\nMost likely, you did not copy over files properly."
         );
-        return 1;
     }
 
     CDimmedWindow *pDimmedWindow = NULL;
@@ -241,8 +237,7 @@ int WINAPI wWinMain(
         }
         else
         {
-            MessageBoxW(NULL, L"Failed to create dim window!", L"ClassicShutdown", MB_ICONERROR);
-            return 1;
+            ERRORANDQUIT(L"Failed to create dim window!");
         }
     }
     else
@@ -326,6 +321,7 @@ int WINAPI wWinMain(
         uDlgId = g_bLogoff ? IDD_LOGOFFWINDOWS : IDD_EXITWINDOWS;
         pDlgProc = g_bLogoff ? LogoffDlgProc : ExitWindowsDlgProc;
     }
+
 
     DialogBoxParamW(
         g_hMuiInstance,

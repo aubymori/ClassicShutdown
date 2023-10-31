@@ -70,7 +70,11 @@ CDimmedWindow::CDimmedWindow (HINSTANCE hInstance) :
     _idxSaturation(0),
     _hdcDimmed(NULL),
     _hbmOldDimmed(NULL),
-    _hbmDimmed(NULL)
+    _hbmDimmed(NULL),
+    _xVirtualScreen(0),
+    _yVirtualScreen(0),
+    _cxVirtualScreen(0),
+    _cyVirtualScreen(0)
 {
     WNDCLASSEXW wndClassEx;
 
@@ -79,7 +83,6 @@ CDimmedWindow::CDimmedWindow (HINSTANCE hInstance) :
     wndClassEx.lpfnWndProc = WndProc;
     wndClassEx.hInstance = hInstance;
     wndClassEx.lpszClassName = s_szWindowClassName;
-    wndClassEx.hCursor = LoadCursor(NULL, IDC_ARROW);
     _atom = RegisterClassExW(&wndClassEx);
 }
 
@@ -211,37 +214,23 @@ ULONG   CDimmedWindow::Release (void)
 HWND    CDimmedWindow::Create (void)
 
 {
-    BOOL    fScreenReader;
-    bool    fNoDebuggerPresent, fConsoleSession, fNoScreenReaderPresent;
-
-    fNoDebuggerPresent = !IsDebuggerPresent();
-    fConsoleSession = (GetSystemMetrics(SM_REMOTESESSION) == FALSE);
-    fNoScreenReaderPresent = ((SystemParametersInfoW(SPI_GETSCREENREADER, 0, &fScreenReader, 0) == FALSE) || (fScreenReader == FALSE));
-    if (fNoDebuggerPresent &&
-        fConsoleSession &&
-        fNoScreenReaderPresent)
+    _xVirtualScreen = GetSystemMetrics(SM_XVIRTUALSCREEN);
+    _yVirtualScreen = GetSystemMetrics(SM_YVIRTUALSCREEN);
+    _cxVirtualScreen = GetSystemMetrics(SM_CXVIRTUALSCREEN);
+    _cyVirtualScreen = GetSystemMetrics(SM_CYVIRTUALSCREEN);
+    _hwnd = CreateWindowExW(WS_EX_TOPMOST | WS_EX_TOOLWINDOW,
+                            s_szWindowClassName,
+                            NULL,
+                            WS_POPUP,
+                            _xVirtualScreen, _yVirtualScreen,
+                            _cxVirtualScreen, _cyVirtualScreen,
+                            NULL, NULL, _hInstance, this);
+    if (_hwnd != NULL)
     {
-        _xVirtualScreen = GetSystemMetrics(SM_XVIRTUALSCREEN);
-        _yVirtualScreen = GetSystemMetrics(SM_YVIRTUALSCREEN);
-        _cxVirtualScreen = GetSystemMetrics(SM_CXVIRTUALSCREEN);
-        _cyVirtualScreen = GetSystemMetrics(SM_CYVIRTUALSCREEN);
-        _hwnd = CreateWindowExW(WS_EX_TOPMOST | WS_EX_TOOLWINDOW,
-                                s_szWindowClassName,
-                                NULL,
-                                WS_POPUP,
-                                _xVirtualScreen, _yVirtualScreen,
-                                _cxVirtualScreen, _cyVirtualScreen,
-                                NULL, NULL, _hInstance, this);
-        if (_hwnd != NULL)
-        {
-            bool    fDimmed;
+        ShowWindow(_hwnd, SW_SHOW);
+        SetForegroundWindow(_hwnd);
 
-            fDimmed = false;
-            ShowWindow(_hwnd, SW_SHOW);
-            SetForegroundWindow(_hwnd);
-
-            EnableWindow(_hwnd, FALSE);
-        }
+        EnableWindow(_hwnd, FALSE);
     }
     return(_hwnd);
 }

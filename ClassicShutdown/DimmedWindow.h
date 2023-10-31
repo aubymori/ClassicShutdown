@@ -12,7 +12,7 @@
 #ifndef     _DimmedWindow_
 #define     _DimmedWindow_
 
-#include "unknwn.h"
+#include <unknwn.h>
 
 //  --------------------------------------------------------------------------
 //  CDimmedWindow::CDimmedWindow

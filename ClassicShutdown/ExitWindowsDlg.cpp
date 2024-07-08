@@ -6,7 +6,7 @@
 #ifndef _ExitWindowsDlg_
 #define _ExitWindowsDlg_
 
-HBITMAP hbBrand;
+HBITMAP g_hbBrand;
 
 void MoveChildren(HWND hWnd, int dx, int dy)
 {
@@ -41,6 +41,22 @@ void MoveChildren(HWND hWnd, int dx, int dy)
         SWP_NOZORDER | SWP_NOMOVE);
 }
 
+/**
+  * Load the branding banner from basebrd.dll.
+  * This uses the undocumented BrandingLoadImage function for
+  * maximum compatibility with Server 2022 and later.
+  */
+HBITMAP GetBrandingBitmap(void)
+{
+    /* The ID changed in 1607; first attempt new ID 123, and then use old 121 ID if that fails. */
+    HBITMAP hbBrand = (HBITMAP)BrandingLoadImage(L"Basebrd", 123, IMAGE_BITMAP, 0, 0, LR_DEFAULTCOLOR);
+    if (!hbBrand)
+    {
+        hbBrand = (HBITMAP)BrandingLoadImage(L"Basebrd", 121, IMAGE_BITMAP, 0, 0, LR_DEFAULTCOLOR);
+    }
+    return hbBrand;
+}
+
 INT_PTR CALLBACK ExitWindowsDlgProc(
     HWND   hWnd,
     UINT   uMsg,
@@ -60,19 +76,7 @@ INT_PTR CALLBACK ExitWindowsDlgProc(
                 return FALSE;
             }
 
-            /* The layout of basebrd.dll changed in 1607 */
-            hbBrand = LoadBitmapW(
-                hBasebrd,
-                MAKEINTRESOURCEW(123)
-            );
-
-            if (!hbBrand)
-            {
-                hbBrand = LoadBitmapW(
-                    hBasebrd,
-                    MAKEINTRESOURCEW(121)
-                );
-            }
+            g_hbBrand = GetBrandingBitmap();
 
             HICON hShutDown = LoadIconW(
                 g_hShell32,
@@ -88,7 +92,7 @@ INT_PTR CALLBACK ExitWindowsDlgProc(
 
             /* Resize window to account for branding banner */
             BITMAP bmBrand;
-            GetObjectW(hbBrand, sizeof(BITMAP), &bmBrand);
+            GetObjectW(g_hbBrand, sizeof(BITMAP), &bmBrand);
 
             RECT rcClient;
             GetClientRect(hWnd, &rcClient);
@@ -187,10 +191,10 @@ INT_PTR CALLBACK ExitWindowsDlgProc(
             HDC hDC = BeginPaint(hWnd, &ps);
             HDC hDCMem = CreateCompatibleDC(hDC);
 
-            HBITMAP hbmOld = (HBITMAP)SelectObject(hDCMem, hbBrand);
+            HBITMAP hbmOld = (HBITMAP)SelectObject(hDCMem, g_hbBrand);
 
             BITMAP bmBrand;
-            GetObjectW(hbBrand, sizeof(BITMAP), &bmBrand);
+            GetObjectW(g_hbBrand, sizeof(BITMAP), &bmBrand);
 
             BitBlt(
                 hDC,

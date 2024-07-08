@@ -3,7 +3,7 @@
 
 LANGUAGE LANG_NEUTRAL, SUBLANG_DEFAULT
 
-IDI_CLASSICSHUTDOWN ICON "ClassicShutdown.ico"
+IDI_CLASSICSHUTDOWN             ICON                    "res\\ClassicShutdown.ico"
 
 IDB_BACKGROUND                  BITMAP  DISCARDABLE     "res\\to_background.bmp"
 IDB_FLAG                        BITMAP  DISCARDABLE     "res\\to_flag.bmp"

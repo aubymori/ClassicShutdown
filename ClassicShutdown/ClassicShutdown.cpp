@@ -18,6 +18,8 @@ HINSTANCE     g_hAppInstance, g_hMuiInstance, g_hShell32;
 BOOL          g_bLogoff;
 SHUTDOWNSTYLE g_ssStyle;
 
+BrandingLoadImage_t BrandingLoadImage = nullptr;
+
 /* Virtual screen metrics */
 int x, y, cx, cy;
 
@@ -131,6 +133,18 @@ int WINAPI wWinMain(
     _In_     int       nCmdShow
 )
 {
+    HMODULE hWinBrand = LoadLibraryW(L"winbrand.dll");
+    if (hWinBrand)
+    {
+        BrandingLoadImage = (BrandingLoadImage_t)GetProcAddress(hWinBrand, "BrandingLoadImage");
+    }
+    if (!BrandingLoadImage)
+    {
+        ERRORANDQUIT(
+            L"Failed to load BrandingLoadImage from winbrand.dll"
+        );
+    }
+
     /* Nuke Open-Shell fader if it exists,
        and simulate start menu delay */
     HWND hFader = FindWindowW(L"OpenShell.CMenuFader", NULL);

@@ -10,6 +10,17 @@ extern HINSTANCE g_hAppInstance, g_hMuiInstance, g_hShell32;
 extern BOOL      g_bLogoff;
 extern LPDWORD   g_dwRes;
 
+typedef HANDLE (WINAPI *BrandingLoadImage_t)(
+    LPCWSTR lpszModule,
+    UINT    uImageId,
+    UINT    type,
+    int     cx,
+    int     cy,
+    UINT    fuLoad
+);
+
+extern BrandingLoadImage_t BrandingLoadImage;
+
 typedef enum tagSHUTDOWNSTYLE
 {
     SS_CLASSIC,

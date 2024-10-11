@@ -19,8 +19,7 @@ extern "C"
 #endif
 	#define FALLBACK_LOCALE  L"en-US"
 
-	HMODULE GetMUIModule(HMODULE hMod);
-	HMODULE LoadMUIModule(LPWSTR lpLibFileName);
+	HMODULE GetMUIModule(HMODULE hMod, LPCWSTR lpLocale);
 #ifdef __cplusplus
 }
 #endif

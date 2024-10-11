@@ -89,6 +89,4 @@ INT_PTR CALLBACK LogoffDlgProc(
         default:
             return FALSE;
     }
-
-    return TRUE;
 }

@@ -16,8 +16,8 @@
 #define  IDS_RESTART_DESC          305
 #define  IDS_STANDBY               306
 #define  IDS_STANDBY_DESC          307
-#define  IDS_LOCK                  308
-#define  IDS_LOCK_DESC             309
+#define  IDS_HIBER                 308
+#define  IDS_HIBER_DESC            309
 
 /* XP Classic Log Off button (replaces Yes) */
 #define  IDS_LOGOFF_BTN            310
@@ -34,6 +34,7 @@
 #define IDC_BUTTON_TURNOFF                          20103
 #define IDC_BUTTON_STANDBY                          20104
 #define IDC_BUTTON_RESTART                          20105
+#define IDC_BUTTON_HIBERNATE                        20106
 #define IDC_TEXT_TURNOFF                            20107
 #define IDC_TEXT_STANDBY                            20108
 #define IDC_TEXT_RESTART                            20109
@@ -50,7 +51,9 @@
 #define IDS_TURNOFF_BUTTON_FACESIZE                 20128
 #define IDS_TURNOFF_TOOLTIP_TEXT_TURNOFF            20129
 #define IDS_TURNOFF_TOOLTIP_TEXT_STANDBY            20130
+#define IDS_TURNOFF_TOOLTIP_TEXT_STANDBY_HIBERNATE  20131
 #define IDS_TURNOFF_TOOLTIP_TEXT_RESTART            20132
+#define IDS_TURNOFF_TOOLTIP_TEXT_HIBERNATE          20133
 #define IDS_SWITCHUSER_TOOLTIP_TEXT_SWITCHUSER     0x380d
 #define IDS_SWITCHUSER_TOOLTIP_TEXT_LOGOFF         0x380e
 

@@ -1,6 +1,6 @@
 #include "mui.h"
 
-HMODULE GetMUIModule(HMODULE hMod)
+HMODULE GetMUIModule(HMODULE hMod, LPCWSTR lpLocale)
 {
 	HMODULE  hMui;
 	WCHAR    szPath[MAX_PATH];
@@ -16,12 +16,17 @@ HMODULE GetMUIModule(HMODULE hMod)
 	}
 
 	WCHAR  szLocale[LOCALE_NAME_MAX_LENGTH];
-	if (!GetUserDefaultLocaleName(
-		szLocale,
-		LOCALE_NAME_MAX_LENGTH
-	))
+	if (!lpLocale || !lpLocale[0])
 	{
-		return NULL;
+		if (!GetUserDefaultLocaleName(
+			szLocale,
+			LOCALE_NAME_MAX_LENGTH
+		))
+			return NULL;
+	}
+	else
+	{
+		wcscpy_s(szLocale, LOCALE_NAME_MAX_LENGTH, lpLocale);
 	}
 
 	WCHAR *pBackslash = wcsrchr(szPath, L'\\');
@@ -54,20 +59,6 @@ HMODULE GetMUIModule(HMODULE hMod)
 			}
 		}
 		return hMui;
-	}
-
-	return NULL;
-}
-
-HMODULE LoadMUIModule(LPWSTR lpLibFileName)
-{
-	HMODULE hTemp = LoadLibraryW(lpLibFileName);
-
-	if (hTemp)
-	{
-		HMODULE hRet = GetMUIModule(hTemp);
-		FreeLibrary(hTemp);
-		return hRet;
 	}
 
 	return NULL;

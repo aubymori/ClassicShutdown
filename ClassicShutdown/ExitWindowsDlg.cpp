@@ -6,7 +6,7 @@
 #ifndef _ExitWindowsDlg_
 #define _ExitWindowsDlg_
 
-HBITMAP g_hbBrand;
+HBITMAP s_hbBrand;
 
 void MoveChildren(HWND hWnd, int dx, int dy)
 {
@@ -68,15 +68,7 @@ INT_PTR CALLBACK ExitWindowsDlgProc(
     {
         case WM_INITDIALOG:
         {
-            HINSTANCE hBasebrd = LoadLibraryW(L"C:\\Windows\\Branding\\Basebrd\\basebrd.dll");
-            if (!hBasebrd)
-            {
-                MessageBoxW(NULL, L"Failed to load basebrd.dll!", L"ClassicShutdown", MB_ICONERROR);
-                HandleShutdown(hWnd, SHTDN_NONE);
-                return FALSE;
-            }
-
-            g_hbBrand = GetBrandingBitmap();
+            s_hbBrand = GetBrandingBitmap();
 
             HICON hShutDown = LoadIconW(
                 g_hShell32,
@@ -92,7 +84,7 @@ INT_PTR CALLBACK ExitWindowsDlgProc(
 
             /* Resize window to account for branding banner */
             BITMAP bmBrand;
-            GetObjectW(g_hbBrand, sizeof(BITMAP), &bmBrand);
+            GetObjectW(s_hbBrand, sizeof(BITMAP), &bmBrand);
 
             RECT rcClient;
             GetClientRect(hWnd, &rcClient);
@@ -139,7 +131,7 @@ INT_PTR CALLBACK ExitWindowsDlgProc(
             }
 
             HWND hComboBox = GetDlgItem(hWnd, IDD_EXITWINDOWS_COMBOBOX);
-            WCHAR szLogoffFormat[64], szLogoff[300], szShutdown[64], szRestart[64], szStandby[64], szLock[64], szUsername[UNLEN + 1];
+            WCHAR szLogoffFormat[64], szLogoff[300], szShutdown[64], szRestart[64], szStandby[64], szHiber[64], szUsername[UNLEN + 1];
 
             LoadStringW(g_hMuiInstance, IDS_LOGOFF, szLogoffFormat, 64);
 
@@ -151,13 +143,14 @@ INT_PTR CALLBACK ExitWindowsDlgProc(
             LoadStringW(g_hMuiInstance, IDS_SHUTDOWN, szShutdown, 64);
             LoadStringW(g_hMuiInstance, IDS_RESTART, szRestart, 64);
             LoadStringW(g_hMuiInstance, IDS_STANDBY, szStandby, 64);
-            LoadStringW(g_hMuiInstance, IDS_LOCK, szLock, 64);
+            LoadStringW(g_hMuiInstance, IDS_HIBER, szHiber, 64);
 
             SendMessageW(hComboBox, CB_ADDSTRING, 0, (LPARAM)szLogoff);
             SendMessageW(hComboBox, CB_ADDSTRING, 0, (LPARAM)szShutdown);
             SendMessageW(hComboBox, CB_ADDSTRING, 0, (LPARAM)szRestart);
             SendMessageW(hComboBox, CB_ADDSTRING, 0, (LPARAM)szStandby);
-            SendMessageW(hComboBox, CB_ADDSTRING, 0, (LPARAM)szLock);
+            if (g_bHibernationAvailable)
+                SendMessageW(hComboBox, CB_ADDSTRING, 0, (LPARAM)szHiber);
             SendMessageW(hComboBox, CB_SETCURSEL, 1, 0);
 
             WCHAR szShutdownDesc[256];
@@ -191,10 +184,10 @@ INT_PTR CALLBACK ExitWindowsDlgProc(
             HDC hDC = BeginPaint(hWnd, &ps);
             HDC hDCMem = CreateCompatibleDC(hDC);
 
-            HBITMAP hbmOld = (HBITMAP)SelectObject(hDCMem, g_hbBrand);
+            HBITMAP hbmOld = (HBITMAP)SelectObject(hDCMem, s_hbBrand);
 
             BITMAP bmBrand;
-            GetObjectW(g_hbBrand, sizeof(BITMAP), &bmBrand);
+            GetObjectW(s_hbBrand, sizeof(BITMAP), &bmBrand);
 
             BitBlt(
                 hDC,
@@ -237,8 +230,8 @@ INT_PTR CALLBACK ExitWindowsDlgProc(
                     case SHTDN_STANDBY:
                         uStringId = IDS_STANDBY_DESC;
                         break;
-                    case SHTDN_LOCK:
-                        uStringId = IDS_LOCK_DESC;
+                    case SHTDN_HIBER:
+                        uStringId = IDS_HIBER_DESC;
                         break;
                 }
 

@@ -16,6 +16,7 @@ HWND          g_hDesktopWnd, g_hDlg;
 HBITMAP       g_hbDesktop;
 HINSTANCE     g_hAppInstance, g_hMuiInstance, g_hShell32;
 BOOL          g_bLogoff;
+BOOL          g_bHibernationAvailable;
 SHUTDOWNSTYLE g_ssStyle;
 
 BrandingLoadImage_t BrandingLoadImage = nullptr;
@@ -63,8 +64,11 @@ void HandleShutdown(HWND hWnd, DWORD dwCode)
         case SHTDN_STANDBY:
             SetSuspendState(FALSE, TRUE, FALSE);
             break;
-        case SHTDN_LOCK:
-            LockWorkStation();
+        case SHTDN_HIBER:
+            SetSuspendState(TRUE, FALSE, FALSE);
+            break;
+        case SHTDN_DISCONNECT:
+            WTSDisconnectSession(WTS_CURRENT_SERVER_HANDLE, WTS_CURRENT_SESSION, FALSE);
             break;
         default:
         {
@@ -154,15 +158,14 @@ int WINAPI wWinMain(
         ShowWindow(hFader, SW_HIDE);
     }
 
-    /* Set up HINSTANCEs */
-    g_hAppInstance = hInstance;
-    g_hMuiInstance = GetMUIModule(g_hAppInstance);
-    if (!g_hMuiInstance)
-    {
-        ERRORANDQUIT(
-            L"Failed to load language resources.\n\nMost likely, you did not copy over files properly."
-        );
-    }
+    /* Check if hibernation is available */
+    SYSTEM_POWER_CAPABILITIES spc = { 0 };
+    CallNtPowerInformation(
+        SystemPowerCapabilities,
+        NULL, NULL,
+        &spc, sizeof(spc)
+    );
+    g_bHibernationAvailable = spc.HiberFilePresent;
 
     CDimmedWindow *pDimmedWindow = NULL;
 
@@ -194,6 +197,7 @@ int WINAPI wWinMain(
     LPWSTR *argv = CommandLineToArgvW(
         lpCmdLine, &argc
     );
+    WCHAR szLocale[LOCALE_NAME_MAX_LENGTH] = { 0 };
     for (int i = 0; i < argc; i++)
     {
         if (!_wcsicmp(argv[i], L"/logoff"))
@@ -240,6 +244,32 @@ int WINAPI wWinMain(
                 g_ssStyle = SS_CLASSIC;
             }
         }
+        else if (!_wcsicmp(argv[i], L"/lang"))
+        {
+            if (i + 1 != argc)
+            {
+                wcscpy_s(szLocale, LOCALE_NAME_MAX_LENGTH, argv[i + 1]);
+            }
+            else
+            {
+                MessageBoxW(
+                    NULL,
+                    L"No value defined for /lang parameter, defaulting to system locale.",
+                    L"ClassicShutdown",
+                    MB_ICONWARNING
+                );
+            }
+        }
+    }
+
+    /* Set up HINSTANCEs */
+    g_hAppInstance = hInstance;
+    g_hMuiInstance = GetMUIModule(g_hAppInstance, szLocale);
+    if (!g_hMuiInstance)
+    {
+        ERRORANDQUIT(
+            L"Failed to load language resources.\n\nMost likely, you did not copy over files properly."
+        );
     }
 
     if (IsXP(g_ssStyle))

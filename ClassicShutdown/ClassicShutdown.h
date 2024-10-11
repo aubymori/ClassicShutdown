@@ -8,6 +8,7 @@ extern HWND      g_hDesktopWnd, g_hDlg;
 extern HBITMAP   g_hbDesktop;
 extern HINSTANCE g_hAppInstance, g_hMuiInstance, g_hShell32;
 extern BOOL      g_bLogoff;
+extern BOOL      g_bHibernationAvailable;
 extern LPDWORD   g_dwRes;
 
 typedef HANDLE (WINAPI *BrandingLoadImage_t)(
@@ -44,6 +45,7 @@ return 1;
 #define SHTDN_SHUTDOWN    2
 #define SHTDN_RESTART     3
 #define SHTDN_STANDBY     4
-#define SHTDN_LOCK        5
+#define SHTDN_HIBER       5
+#define SHTDN_DISCONNECT  6
 
 #endif

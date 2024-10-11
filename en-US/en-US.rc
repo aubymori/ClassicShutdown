@@ -40,8 +40,8 @@ STRINGTABLE
 	IDS_RESTART_DESC  "Ends your session, shuts down Windows, and starts Windows again."
 	IDS_STANDBY       "Stand by"
 	IDS_STANDBY_DESC  "Maintains your session, keeping the computer running on low power with data still in memory."
-	IDS_LOCK          "Lock"
-	IDS_LOCK_DESC     "Maintains your session, requiring you to log in to access your desktop again."
+	IDS_HIBER         "Hibernate"
+	IDS_HIBER_DESC    "Saves your session to disk so that you can safely turn off power.  Your session is restored the next time you start Windows."
 	IDS_LOGOFF_BTN    "&Log Off"
 	IDS_CANCEL_BTN    "Cancel"
 }
@@ -57,6 +57,7 @@ FONT 8, "MS Shell Dlg"
 	CONTROL         "&Stand By", IDC_BUTTON_STANDBY, "Button", BS_OWNERDRAW | BS_NOTIFY | WS_TABSTOP, 36, 49, 22, 20
 	CONTROL         "T&urn Off", IDC_BUTTON_TURNOFF, "Button", BS_OWNERDRAW | BS_NOTIFY | WS_TABSTOP, 93, 49, 22, 20
 	CONTROL         "&Restart", IDC_BUTTON_RESTART, "Button", BS_OWNERDRAW | BS_NOTIFY | WS_TABSTOP, 150, 49, 22, 20
+	CONTROL         "&Hibernate", IDC_BUTTON_HIBERNATE, BUTTON, BS_PUSHBUTTON | BS_NOTIFY | WS_CHILD | WS_VISIBLE, 30093, 30049, 22, 20
 	CONTROL         "", IDC_TEXT_STANDBY, "Static", SS_OWNERDRAW | WS_DISABLED, 22, 73, 50, 8
 	CONTROL         "", IDC_TEXT_TURNOFF, "Static", SS_OWNERDRAW | WS_DISABLED, 79, 73, 50, 8
 	CONTROL         "", IDC_TEXT_RESTART, "Static", SS_OWNERDRAW | WS_DISABLED, 136, 73, 50, 8
@@ -85,6 +86,8 @@ STRINGTABLE DISCARDABLE
 	IDS_TURNOFF_BUTTON_FACESIZE                 "8"
 	IDS_TURNOFF_TOOLTIP_TEXT_TURNOFF            "Shuts down Windows so that you can safely turn off the computer."
 	IDS_TURNOFF_TOOLTIP_TEXT_STANDBY            "Puts your computer in a low-power state so that you can quickly resume your Windows session."
+	IDS_TURNOFF_TOOLTIP_TEXT_STANDBY_HIBERNATE  "Puts your computer in a low-power state so that you can quickly resume your Windows session.\r\n\r\nTo hibernate instead, hold down the Shift key."
+	IDS_TURNOFF_TOOLTIP_TEXT_HIBERNATE          "Saves your current desktop state to your hard disk so that you can resume where you left off, then shuts down your computer."
 	IDS_TURNOFF_TOOLTIP_TEXT_RESTART            "Shuts down Windows and then starts Windows again."
 	IDS_SWITCHUSER_TOOLTIP_TEXT_SWITCHUSER      "Lets another user log on while your programs and files remain open.\r\n\r\n(You can also switch users by pressing the Windows logo key + L.)"
 	IDS_SWITCHUSER_TOOLTIP_TEXT_LOGOFF          "Closes your programs and ends your Windows session."

@@ -40,8 +40,8 @@ STRINGTABLE
 	IDS_RESTART_DESC  "セッションを終了し、Windows をシャットダウンして再起動します。"
 	IDS_STANDBY       "スタンバイ"
 	IDS_STANDBY_DESC  "データがメモリにある状態で、コンピュータを低電力で実行したままセッションを維持します。"
-	IDS_LOCK          "ロックする"
-	IDS_LOCK_DESC     "セッションを維持し、デスクトップに再アクセスするにはログインが必要です。"
+	IDS_HIBER         "休止状態"
+	IDS_HIBER_DESC    "セッションをディスクに保存して、電源を安全に切れるようにします。セッションは次回 Windows を再起動すると復元されます。"
 	IDS_LOGOFF_BTN    "ログオフ（&L）"
 	IDS_CANCEL_BTN    "キャンセル"
 }
@@ -57,6 +57,7 @@ FONT 8, "MS Shell Dlg"
 	CONTROL         "スタンバイ（&S）", IDC_BUTTON_STANDBY, "Button", BS_OWNERDRAW | BS_NOTIFY | WS_TABSTOP, 36, 49, 22, 20
 	CONTROL         "電源を切る（&U）", IDC_BUTTON_TURNOFF, "Button", BS_OWNERDRAW | BS_NOTIFY | WS_TABSTOP, 93, 49, 22, 20
 	CONTROL         "再起動（&R）", IDC_BUTTON_RESTART, "Button", BS_OWNERDRAW | BS_NOTIFY | WS_TABSTOP, 150, 49, 22, 20
+	CONTROL         "休止状態(&H)", IDC_BUTTON_HIBERNATE, BUTTON, BS_PUSHBUTTON | BS_NOTIFY | WS_CHILD | WS_VISIBLE, 30093, 30049, 22, 20
 	CONTROL         "", IDC_TEXT_STANDBY, "Static", SS_OWNERDRAW | WS_DISABLED, 20, 73, 54, 8
 	CONTROL         "", IDC_TEXT_TURNOFF, "Static", SS_OWNERDRAW | WS_DISABLED, 77, 73, 54, 8
 	CONTROL         "", IDC_TEXT_RESTART, "Static", SS_OWNERDRAW | WS_DISABLED, 134, 73, 54, 8
@@ -85,6 +86,8 @@ STRINGTABLE DISCARDABLE
 	IDS_TURNOFF_BUTTON_FACESIZE                 "8"
 	IDS_TURNOFF_TOOLTIP_TEXT_TURNOFF            "安全にコンピュータの電源を切るために Windows をシャットダウンします。"
 	IDS_TURNOFF_TOOLTIP_TEXT_STANDBY            "コンピュータを低電力の状態にし、 Windows セッションをすばやく再開できるようにします。"
+	IDS_TURNOFF_TOOLTIP_TEXT_STANDBY_HIBERNATE  "コンピュータを低電力の状態にし、Windows セッションをすばやく再開できるようにします。\r\n\r\n休止状態にするには、Shift キーを押してください。"
+	IDS_TURNOFF_TOOLTIP_TEXT_HIBERNATE          "現在のデスクトップの状態をハード ディスクに保存し、コンピュータをシャットダウンします。次回起動したときには、現在の状態が再現されます。"
 	IDS_TURNOFF_TOOLTIP_TEXT_RESTART            "Windows をシャットダウンして再起動します。"
 	IDS_SWITCHUSER_TOOLTIP_TEXT_SWITCHUSER      "プログラムやファイルが開いたままで、ほかのユーザーがログオンできます。\r\n\r\n(Windows ロゴキーと "L" を同時に押すとユーザーを切り替えることができます。)"
 	IDS_SWITCHUSER_TOOLTIP_TEXT_LOGOFF          "プログラムを閉じて Windows セッションを終了します。"

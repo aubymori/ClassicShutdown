@@ -33,8 +33,8 @@ void PositionDlg(HWND hDlg)
     SetWindowPos(
         hDlg,
         HWND_TOP,
-        (GetSystemMetrics(SM_CXSCREEN) - (rc.right - rc.left)) / 2 + x,
-        (GetSystemMetrics(SM_CYSCREEN) - (rc.bottom - rc.top)) / 3 + y,
+        (GetSystemMetrics(SM_CXSCREEN) - (rc.right - rc.left)) / 2,
+        (GetSystemMetrics(SM_CYSCREEN) - (rc.bottom - rc.top)) / 3,
         0, 0,
         SWP_NOSIZE
     );

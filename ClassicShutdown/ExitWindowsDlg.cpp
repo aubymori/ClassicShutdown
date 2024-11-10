@@ -273,6 +273,7 @@ INT_PTR CALLBACK ExitWindowsDlgProc(
             }
             return FALSE;
             break;
+#ifndef DEBUG
         case WM_ACTIVATE:
             if (LOWORD(wParam) == WA_INACTIVE)
             {
@@ -280,6 +281,7 @@ INT_PTR CALLBACK ExitWindowsDlgProc(
                 return FALSE;
             }
             break;
+#endif
         default:
             return FALSE;
     }

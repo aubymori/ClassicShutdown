@@ -3,7 +3,7 @@
 
 #include <commctrl.h>
 
-#define TIMER_HIBERNATE 0x1
+#define BUTTON_SIZE   32
 
 static RECT    s_rcBkgnd, s_rcFlag, s_rcBtns;
 static HBITMAP s_hbmBkgnd, s_hbmFlag, s_hbmBtns;
@@ -311,7 +311,7 @@ INT_PTR CALLBACK FriendlyDlgProc(
                 g_bLogoff ? MAKEINTRESOURCEW(IDB_LOGOFF_BUTTONS) : MAKEINTRESOURCEW(IDB_BUTTONS),
                 IMAGE_BITMAP,
                 0, 0,
-                LR_CREATEDIBSECTION
+                0//LR_CREATEDIBSECTION
             );
             GetObject(s_hbmBtns, sizeof(BITMAP), &bm);
             SetRect(&s_rcBtns, 0, 0, bm.bmWidth, bm.bmHeight);
@@ -388,7 +388,7 @@ INT_PTR CALLBACK FriendlyDlgProc(
             if (!g_bLogoff && g_bHibernationAvailable)
             {
                 OutputDebugStringW(L"Setting timer\r\n");
-                SetTimer(hWnd, TIMER_HIBERNATE, 50, NULL);
+                SetTimer(hWnd, 0, 50, NULL);
             }
             break;
         }
@@ -493,12 +493,14 @@ INT_PTR CALLBACK FriendlyDlgProc(
                 );
             }
             break;
+#ifndef DEBUG
         case WM_ACTIVATE:
             if (LOWORD(wParam) == WA_INACTIVE)
             {
                 HandleShutdown(hWnd, SHTDN_NONE);
             }
             break;
+#endif
         case WM_DRAWITEM:
         {
             LPDRAWITEMSTRUCT pDIS = (LPDRAWITEMSTRUCT)lParam;
@@ -637,24 +639,41 @@ INT_PTR CALLBACK FriendlyDlgProc(
                         iVOffset += 2;
                     }
 
-                    iVOffset *= 32;
+                    iVOffset *= BUTTON_SIZE;
 
+                    // Paint BG
+                    CopyRect(&rc, &s_rcBkgnd);
+                    MapWindowPoints(pDIS->hwndItem, hWnd, (LPPOINT)&rc, 2);
+                    rc.right = rc.left + BUTTON_SIZE;
+                    rc.bottom = rc.top + BUTTON_SIZE;
+                    PaintBitmap(pDIS->hDC, &pDIS->rcItem, s_hbmBkgnd, &rc);
+
+                    // Paint button
                     SetRect(
                         &rc,
                         0,
                         iVOffset,
-                        32,
-                        iVOffset + 32
+                        BUTTON_SIZE,
+                        iVOffset + BUTTON_SIZE
                     );
-
-                    PaintBitmap(
-                        pDIS->hDC, &pDIS->rcItem, s_hbmBtns, &rc
-                    );
+                    PaintBitmap(pDIS->hDC, &pDIS->rcItem, s_hbmBtns, &rc);
                     break;
                 }
                 case IDC_TITLE_FLAG:
-                    PaintBitmap(pDIS->hDC, &pDIS->rcItem, s_hbmFlag, &s_rcFlag);
+                {
+                    RECT rc;
+                    BITMAP bm;
+                    GetClientRect(pDIS->hwndItem, &rc);
+                    if (GetObject(s_hbmFlag, sizeof(bm), &bm))
+                    {
+                        rc.left += ((rc.right - rc.left) - bm.bmWidth) / 2;
+                        rc.right = rc.left + bm.bmWidth;
+                        rc.top += ((rc.bottom - rc.top) - bm.bmHeight) / 2;
+                        rc.bottom = rc.top + bm.bmHeight;
+                    }
+                    PaintBitmap(pDIS->hDC, &rc, s_hbmFlag, &s_rcFlag);
                     break;
+                }
             }
         }
         default:

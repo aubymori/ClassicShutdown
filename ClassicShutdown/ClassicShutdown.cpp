@@ -157,6 +157,15 @@ int WINAPI wWinMain(
         Sleep(100);
         ShowWindow(hFader, SW_HIDE);
     }
+    /* Windows XP Explorer creates one as well, but the
+       delay doesn't need to be simulated */
+    else if (hFader = FindWindowW(L"SysFader", NULL))
+    {
+        /* The SysFader runs a loop that locks up the message
+           loop, so we just make it completely transparent instead
+           of really hiding it. */
+        SetLayeredWindowAttributes(hFader, NULL, 0, LWA_ALPHA);
+    }
 
     /* Check if hibernation is available */
     SYSTEM_POWER_CAPABILITIES spc = { 0 };

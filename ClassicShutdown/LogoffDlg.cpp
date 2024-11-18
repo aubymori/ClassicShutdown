@@ -80,14 +80,12 @@ INT_PTR CALLBACK LogoffDlgProc(
             }
             return FALSE;
             break;
-#ifndef DEBUG
         case WM_ACTIVATE:
             if (LOWORD(wParam) == WA_INACTIVE)
             {
                 HandleShutdown(hWnd, SHTDN_NONE);
             }
             break;
-#endif
         default:
             return FALSE;
     }

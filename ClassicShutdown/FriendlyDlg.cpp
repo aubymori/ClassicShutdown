@@ -493,14 +493,12 @@ INT_PTR CALLBACK FriendlyDlgProc(
                 );
             }
             break;
-#ifndef DEBUG
         case WM_ACTIVATE:
             if (LOWORD(wParam) == WA_INACTIVE)
             {
                 HandleShutdown(hWnd, SHTDN_NONE);
             }
             break;
-#endif
         case WM_DRAWITEM:
         {
             LPDRAWITEMSTRUCT pDIS = (LPDRAWITEMSTRUCT)lParam;

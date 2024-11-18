@@ -4,10 +4,6 @@
 #ifndef _ClassicShutdown_
 #define _ClassicShutdown_
 
-#ifndef NDEBUG
-#define DEBUG
-#endif
-
 extern HWND      g_hDesktopWnd, g_hDlg;
 extern HBITMAP   g_hbDesktop;
 extern HINSTANCE g_hAppInstance, g_hMuiInstance, g_hShell32;

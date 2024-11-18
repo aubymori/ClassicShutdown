@@ -281,7 +281,6 @@ int WINAPI wWinMain(
         );
     }
 
-#ifndef DEBUG
     if (IsXP(g_ssStyle))
     {
         pDimmedWindow = new CDimmedWindow(hInstance);
@@ -361,7 +360,6 @@ int WINAPI wWinMain(
         DeleteDC(hMemDC);
         ReleaseDC(g_hDesktopWnd, hDC);
     }
-#endif
 
     UINT    uDlgId;
     DLGPROC pDlgProc;

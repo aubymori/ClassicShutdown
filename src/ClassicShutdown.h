@@ -6,7 +6,7 @@
 
 extern HWND      g_hDesktopWnd, g_hDlg;
 extern HBITMAP   g_hbDesktop;
-extern HINSTANCE g_hAppInstance, g_hMuiInstance, g_hShell32;
+extern HINSTANCE g_hAppInstance, g_hShell32;
 extern BOOL      g_bLogoff;
 extern BOOL      g_bHibernationAvailable;
 extern LPDWORD   g_dwRes;

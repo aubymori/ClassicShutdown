@@ -1,0 +1,16 @@
+<localization>
+	<resources>
+		<win32Resources fileType="Application">
+			<neutralResources>
+			</neutralResources>
+			<localizedResources>
+				<!-- RT_MENU -->
+				<resourceType typeNameId="#4"/>
+				<!-- RT_DIALOG -->
+				<resourceType typeNameId="#5"/>
+				<!-- RT_STRING -->
+				<resourceType typeNameId="#6"/>
+			</localizedResources>
+		</win32Resources>
+	</resources>
+</localization>

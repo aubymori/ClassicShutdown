@@ -1,13 +1,13 @@
-﻿#include <windows.h>
-#include "..\ClassicShutdown\resource.h"
+#pragma code_page(65001)
+#include <windows.h>
+#include "resource.h"
 
-LANGUAGE LANG_JAPANESE, SUBLANG_DEFAULT
+LANGUAGE LANG_JAPANESE, SUBLANG_JAPANESE_JAPAN
 
 /* Main (classic) */
 IDD_EXITWINDOWS DIALOG 0, 0, 274, 103
 STYLE DS_SHELLFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
 CAPTION "Windows のシャットダウン"
-LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
 FONT 8, "MS Shell Dlg 2"
 {
 	CONTROL 0, IDD_EXITWINDOWS_ICON, STATIC, SS_ICON | WS_CHILD | WS_VISIBLE | WS_GROUP, 7, 7, 20, 20

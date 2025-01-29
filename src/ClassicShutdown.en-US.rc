@@ -1,5 +1,5 @@
 #include <windows.h>
-#include "..\ClassicShutdown\resource.h"
+#include "resource.h"
 
 LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
 

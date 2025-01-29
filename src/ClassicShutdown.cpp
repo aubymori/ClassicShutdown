@@ -8,13 +8,12 @@
 #include "LogoffDlg.h"
 #include "FriendlyDlg.h"
 #include "DimmedWindow.h"
-#include "mui.h"
 
 const WCHAR DITHER_CLSNAME[] = L"ClassicShutdown_Dither";
 
 HWND          g_hDesktopWnd, g_hDlg;
 HBITMAP       g_hbDesktop;
-HINSTANCE     g_hAppInstance, g_hMuiInstance, g_hShell32;
+HINSTANCE     g_hAppInstance, g_hShell32;
 BOOL          g_bLogoff;
 BOOL          g_bHibernationAvailable;
 SHUTDOWNSTYLE g_ssStyle;
@@ -273,13 +272,6 @@ int WINAPI wWinMain(
 
     /* Set up HINSTANCEs */
     g_hAppInstance = hInstance;
-    g_hMuiInstance = GetMUIModule(g_hAppInstance, szLocale);
-    if (!g_hMuiInstance)
-    {
-        ERRORANDQUIT(
-            L"Failed to load language resources.\n\nMost likely, you did not copy over files properly."
-        );
-    }
 
     if (IsXP(g_ssStyle))
     {
@@ -377,7 +369,7 @@ int WINAPI wWinMain(
 
 
     DialogBoxParamW(
-        g_hMuiInstance,
+        g_hAppInstance,
         MAKEINTRESOURCEW(uDlgId),
         g_hDesktopWnd,
         pDlgProc,
@@ -389,9 +381,9 @@ int WINAPI wWinMain(
         pDimmedWindow->Release();
     }
 
-    if (g_hMuiInstance)
+    if (g_hAppInstance)
     {
-        FreeLibrary(g_hMuiInstance);
+        FreeLibrary(g_hAppInstance);
     }
 
     return 0;

@@ -1,0 +1,3 @@
+LIBRARY WINBRAND
+EXPORTS
+	BrandingLoadImage ;argsize=24

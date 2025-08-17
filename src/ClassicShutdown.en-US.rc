@@ -1,94 +1,217 @@
 #include <windows.h>
-#include "resource.h"
+#include <winres.h>
+#include "Resource.h"
+
+#include "Version.rc"
 
 LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
-
-/* Main (classic) */
-IDD_EXITWINDOWS DIALOG 0, 0, 274, 103
-STYLE DS_SHELLFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
-CAPTION "Shut Down Windows"
-LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
-FONT 8, "MS Shell Dlg 2"
-{
-	CONTROL 0, IDD_EXITWINDOWS_ICON, STATIC, SS_ICON | WS_CHILD | WS_VISIBLE | WS_GROUP, 7, 7, 20, 20
-	CONTROL "&What do you want the computer to do?", -1, STATIC, SS_LEFT | WS_CHILD | WS_VISIBLE | WS_GROUP, 39, 7, 153, 10
-	CONTROL "", IDD_EXITWINDOWS_COMBOBOX, COMBOBOX, CBS_DROPDOWNLIST | WS_CHILD | WS_VISIBLE | WS_VSCROLL | WS_TABSTOP, 39, 20, 180, 57
-	CONTROL "", IDD_EXITWINDOWS_LABEL, STATIC, SS_LEFT | WS_CHILD | WS_VISIBLE | WS_GROUP, 39, 40, 180, 33
-	CONTROL "OK", IDOK, BUTTON, BS_DEFPUSHBUTTON | WS_CHILD | WS_VISIBLE | WS_GROUP | WS_TABSTOP, 108, 82, 50, 14
-	CONTROL "Cancel", IDCANCEL, BUTTON, BS_PUSHBUTTON | WS_CHILD | WS_VISIBLE | WS_TABSTOP, 162, 82, 50, 14
-	CONTROL "&Help", IDHELP, BUTTON, BS_PUSHBUTTON | WS_CHILD | WS_VISIBLE | WS_TABSTOP, 216, 82, 50, 14
-}
-
-IDD_LOGOFFWINDOWS DIALOGEX 0, 0, 188, 60
-STYLE DS_SHELLFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
-CAPTION "Log Off Windows"
-FONT 8, "MS Shell Dlg 2"
-{
-	CONTROL 0, IDD_LOGOFFWINDOWS_ICON, STATIC, SS_ICON | WS_CHILD | WS_VISIBLE, 8, 6, 18, 20
-	CONTROL "Are you sure you want to log off?", -1, STATIC, SS_LEFT | WS_CHILD | WS_VISIBLE | WS_GROUP, 49, 15, 131, 8
-	CONTROL "&Yes", IDOK, BUTTON, BS_DEFPUSHBUTTON | WS_CHILD | WS_VISIBLE | WS_TABSTOP, 49, 38, 43, 14
-	CONTROL "&No", IDCANCEL, BUTTON, BS_PUSHBUTTON | WS_CHILD | WS_VISIBLE | WS_TABSTOP, 99, 38, 43, 14
-}
-
-STRINGTABLE
-{
-	IDS_LOGOFF        "Log off %s"
-	IDS_LOGOFF_DESC   "Ends your session, leaving the computer running on full power."
-	IDS_SHUTDOWN      "Shut down"
-	IDS_SHUTDOWN_DESC "Ends your session and shuts down Windows so that you can safely turn off power."
-	IDS_RESTART       "Restart"
-	IDS_RESTART_DESC  "Ends your session, shuts down Windows, and starts Windows again."
-	IDS_STANDBY       "Stand by"
-	IDS_STANDBY_DESC  "Maintains your session, keeping the computer running on low power with data still in memory."
-	IDS_HIBER         "Hibernate"
-	IDS_HIBER_DESC    "Saves your session to disk so that you can safely turn off power.  Your session is restored the next time you start Windows."
-	IDS_LOGOFF_BTN    "&Log Off"
-	IDS_CANCEL_BTN    "Cancel"
-}
-
-/* XP friendly */
-IDD_EXITWINDOWS_FRIENDLY DIALOGEX DISCARDABLE  0, 0, 208, 122
-STYLE DS_SYSMODAL | DS_SETFOREGROUND | WS_POPUP | WS_BORDER
-FONT 8, "MS Shell Dlg"
-{
-	PUSHBUTTON      "Cancel", IDCANCEL, 161, 103, 40, 12
-	CONTROL         "Flag", IDC_TITLE_FLAG, "Static", SS_OWNERDRAW, 176, 0, 32, 26
-	CONTROL         "Turn off computer", IDC_TITLE_TURNOFF, "Static", SS_OWNERDRAW | WS_VISIBLE, 7, 0, 162, 26
-	CONTROL         "&Stand By", IDC_BUTTON_STANDBY, "Button", BS_OWNERDRAW | BS_NOTIFY | WS_TABSTOP, 36, 49, 22, 20
-	CONTROL         "T&urn Off", IDC_BUTTON_TURNOFF, "Button", BS_OWNERDRAW | BS_NOTIFY | WS_TABSTOP, 93, 49, 22, 20
-	CONTROL         "&Restart", IDC_BUTTON_RESTART, "Button", BS_OWNERDRAW | BS_NOTIFY | WS_TABSTOP, 150, 49, 22, 20
-	CONTROL         "&Hibernate", IDC_BUTTON_HIBERNATE, BUTTON, BS_PUSHBUTTON | BS_NOTIFY | WS_CHILD | WS_VISIBLE, 30093, 30049, 22, 20
-	CONTROL         "", IDC_TEXT_STANDBY, "Static", SS_OWNERDRAW | WS_DISABLED, 22, 73, 50, 8
-	CONTROL         "", IDC_TEXT_TURNOFF, "Static", SS_OWNERDRAW | WS_DISABLED, 79, 73, 50, 8
-	CONTROL         "", IDC_TEXT_RESTART, "Static", SS_OWNERDRAW | WS_DISABLED, 136, 73, 50, 8
-}
-
-IDD_LOGOFFWINDOWS_FRIENDLY DIALOGEX DISCARDABLE  0, 0, 208, 122
-STYLE DS_SYSMODAL | DS_SETFOREGROUND | WS_POPUP | WS_BORDER
-FONT 8, "MS Shell Dlg"
-{
-	PUSHBUTTON      "&Cancel", IDCANCEL, 161, 103, 40, 12
-	CONTROL         "Flag", IDC_TITLE_FLAG, "Static", SS_OWNERDRAW, 176, 0, 32, 26
-	CONTROL         "Log Off Windows", IDC_TITLE_SWITCHUSER, "Static", SS_OWNERDRAW, 7, 0, 162, 26
-	CONTROL         "&Switch User", IDC_BUTTON_SWITCHUSER, "Button", BS_OWNERDRAW | BS_NOTIFY | WS_TABSTOP, 55, 49, 22, 20
-	CONTROL         "&Log Off", IDC_BUTTON_LOGOFF, "Button", BS_OWNERDRAW | BS_NOTIFY | WS_TABSTOP, 132, 49, 22, 20
-	CONTROL         "", IDC_TEXT_SWITCHUSER, "Static", SS_OWNERDRAW | WS_DISABLED, 41, 73, 50, 8
-	CONTROL         "", IDC_TEXT_LOGOFF, "Static", SS_OWNERDRAW | WS_DISABLED, 118, 73, 50, 8
-}
 
 STRINGTABLE DISCARDABLE
-{
-	IDS_GENERIC_CAPTION                         "Windows Logon"
+BEGIN
+    // shell32.dll 5.1.2600 or 5.2.3790 dialog 1071, item IDOK (1)
+    IDS_LOGOFF_YES_XP                               "&Log Off"
+    // shell32.dll 5.1.2600 or 5.2.3790 dialog 1071, item IDCANCEL (2)
+    IDS_LOGOFF_NO_XP                                "Cancel"
 
-	IDS_TURNOFF_TITLE_FACENAME                  "Franklin Gothic"
-	IDS_TURNOFF_TITLE_FACESIZE                  "14"
-	IDS_TURNOFF_BUTTON_FACENAME                 "Tahoma"
-	IDS_TURNOFF_BUTTON_FACESIZE                 "8"
-	IDS_TURNOFF_TOOLTIP_TEXT_TURNOFF            "Shuts down Windows so that you can safely turn off the computer."
-	IDS_TURNOFF_TOOLTIP_TEXT_STANDBY            "Puts your computer in a low-power state so that you can quickly resume your Windows session."
-	IDS_TURNOFF_TOOLTIP_TEXT_STANDBY_HIBERNATE  "Puts your computer in a low-power state so that you can quickly resume your Windows session.\r\n\r\nTo hibernate instead, hold down the Shift key."
-	IDS_TURNOFF_TOOLTIP_TEXT_HIBERNATE          "Saves your current desktop state to your hard disk so that you can resume where you left off, then shuts down your computer."
-	IDS_TURNOFF_TOOLTIP_TEXT_RESTART            "Shuts down Windows and then starts Windows again."
-	IDS_SWITCHUSER_TOOLTIP_TEXT_SWITCHUSER      "Lets another user log on while your programs and files remain open.\r\n\r\n(You can also switch users by pressing the Windows logo key + L.)"
-	IDS_SWITCHUSER_TOOLTIP_TEXT_LOGOFF          "Closes your programs and ends your Windows session."
-}
+    // msgina.dll 5.0.2195 strings 8000-8015
+    IDS_SHUTDOWN_NAME                               "Shut down"
+    IDS_SHUTDOWN_DESC                               "Ends your session and shuts down Windows so that you can safely turn off power."
+    IDS_RESTART_NAME                                "Restart"
+    IDS_RESTART_DESC                                "Ends your session, shuts down Windows, and starts Windows again."
+    IDS_SLEEP_NAME                                  "Stand by"
+    IDS_SLEEP_DESC                                  "Maintains your session, keeping the computer running on low power with data still in memory."
+    // SLEEP2 (8006, 8007) not included, IGNORE
+    IDS_HIBERNATE_NAME                              "Hibernate"
+    IDS_HIBERNATE_DESC                              "Saves your session to disk so that you can safely turn off power.  Your session is restored the next time you start Windows."
+    IDS_LOGOFF_NAME                                 "Log off %s"
+    IDS_LOGOFF_DESC                                 "Ends your session, leaving the computer running on full power."
+    IDS_RESTARTDOS_NAME                             "Restart in MS-DOS mode"
+    IDS_RESTARTDOS_DESC                             "Ends your session, shuts down Windows, and starts MS-DOS mode."
+    IDS_DISCONNECT_NAME                             "Disconnect"
+    IDS_DISCONNECT_DESC                             "Disconnects your session. You can reconnect to this session when you log on again."
+
+    // msgina.dll 5.1.2600 or 5.2.3790 strings 20125-20128
+    IDS_TURNOFF_TITLE_FACENAME                      "Franklin Gothic"
+    IDS_TURNOFF_TITLE_FACESIZE                      "14"
+    IDS_TURNOFF_BUTTON_FACENAME                     "Tahoma"
+    IDS_TURNOFF_BUTTON_FACESIZE                     "8"
+
+    // msgina.dll 5.1.2600 or 5.2.3790 strings 20129-20133
+    IDS_TURNOFF_TOOLTIP_TEXT_TURNOFF                "Shuts down Windows so that you can safely turn off the computer."
+    IDS_TURNOFF_TOOLTIP_TEXT_STANDBY                "Puts your computer in a low-power state so that you can quickly resume your Windows session."
+    IDS_TURNOFF_TOOLTIP_TEXT_STANDBY_HIBERNATE      "Puts your computer in a low-power state so that you can quickly resume your Windows session.\r\n\r\nTo hibernate instead, hold down the Shift key."
+    IDS_TURNOFF_TOOLTIP_TEXT_RESTART                "Shuts down Windows and then starts Windows again."
+    IDS_TURNOFF_TOOLTIP_TEXT_HIBERNATE              "Saves your current desktop state to your hard disk so that you can resume where you left off, then shuts down your computer."
+    
+    // shell32.dll 5.1.2600 or 5.2.3790 strings 14349 and 14350
+    IDS_SWITCHUSER_TOOLTIP_TEXT_SWITCHUSER          "Lets another user log on while your programs and files remain open.\r\n\r\n(You can also switch users by pressing the Windows logo key + L.)"                                          
+    IDS_SWITCHUSER_TOOLTIP_TEXT_LOGOFF              "Closes your programs and ends your Windows session."
+END
+
+// Windows 2000 shutdown
+// msgina.dll 5.0.2195 dialog 2200
+IDD_EXITWINDOWS_DIALOG DIALOGEX 0, 0, 274, 93
+STYLE DS_MODALFRAME | DS_SHELLFONT | DS_CENTER | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Shut Down Windows"
+FONT 8, "MS Shell Dlg", 0, 0, 0x1
+BEGIN
+    ICON            0,IDC_EXITWINDOWS_ICON,13,7,20,20,WS_GROUP
+    LTEXT           "&What do you want the computer to do?",IDC_STATIC,44,6,
+                    173,10
+    COMBOBOX        IDC_EXITOPTIONS_COMBO,44,20,180,57,CBS_DROPDOWNLIST | 
+                    WS_VSCROLL | WS_TABSTOP
+    // REMOVE this placeholder text, but not the item itself
+    LTEXT           "",IDC_EXITOPTIONS_DESCRIPTION,44,40,180,30
+    DEFPUSHBUTTON   "OK",IDOK,108,70,50,14,WS_GROUP
+    PUSHBUTTON      "Cancel",IDCANCEL,162,70,50,14
+    PUSHBUTTON      "&Help",IDHELP,216,70,50,14
+END
+
+// Windows Me shutdown
+// shell32.dll 5.50.XXXX dialog 8226
+IDD_EXITWINDOWS_DIALOG_WINME DIALOG DISCARDABLE  0, 0, 211, 103
+STYLE DS_MODALFRAME | DS_SHELLFONT | DS_CENTER | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Shut Down Windows"
+FONT 8, "MS Shell Dlg"
+BEGIN
+    ICON            0,IDC_EXITWINDOWS_ICON,7,7,21,20,WS_GROUP | SS_REALSIZECONTROL
+    LTEXT           "What do you want the computer to do?",-1,39,7,153,10
+    COMBOBOX        IDC_EXITOPTIONS_COMBO,39,20,165,200,CBS_DROPDOWNLIST |
+                    WS_VSCROLL | WS_TABSTOP
+    // REMOVE this placeholder text, but not the item itself
+    LTEXT           "",
+                    IDC_EXITOPTIONS_DESCRIPTION,39,40,165,33
+    DEFPUSHBUTTON   "OK",IDOK,46,82,50,14,WS_GROUP
+    PUSHBUTTON      "Cancel",IDCANCEL,100,82,50,14
+    PUSHBUTTON      "&Help",IDHELP,154,82,50,14
+END
+
+// Windows 95/NT 4.0 shutdown
+// Derived from shell32.dll 95 4.0.0.1111 dialog 1064
+DLG_EXITWINDOWS_WIN95 DIALOG DISCARDABLE  0, 0, 227, 147
+STYLE DS_MODALFRAME | DS_CENTER | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Shut Down Windows"
+FONT 8, "MS Shell Dlg"
+BEGIN
+    LTEXT           "Are you sure you want to:",-1,38,11,151,10
+    // BEGIN CUSTOM STRINGS
+    // Dialog size and control positions are shifted to account for new items
+    CONTROL         "Put the computer into s&tand by?",IDD_SLEEP,"Button",
+                    BS_AUTORADIOBUTTON,38,27,155,10
+    CONTROL         "Put the computer into &hibernation?",IDD_HIBERNATE,"Button",
+                    BS_AUTORADIOBUTTON,38,40,155,10
+    // END CUSTOM STRINGS
+    CONTROL         "&Shut down the computer?",IDD_SHUTDOWN,"Button",
+                    BS_AUTORADIOBUTTON,38,53,155,10
+    CONTROL         "&Restart the computer?",IDD_RESTART,"Button",
+                    BS_AUTORADIOBUTTON,38,66,155,10
+    CONTROL         "Restart the computer in &MS-DOS mode?",
+                    IDD_RESTARTDOS,"Button",BS_AUTORADIOBUTTON,38,79,175,10
+    CONTROL         "&Close all programs and log on as a different user?",
+                    IDD_LOGOFF,"Button",BS_AUTORADIOBUTTON,38,92,175,10
+    ICON            0,IDD_SHUTDOWNICON,7,11,18,20
+    DEFPUSHBUTTON   "&Yes",IDOK,56,125,52,14
+    PUSHBUTTON      "&No",IDCANCEL,112,125,52,14
+    PUSHBUTTON      "&Help",IDHELP,168,125,52,14
+END
+
+// Windows 98 shutdown
+// Derived from shell32.dll 4.72.XXXX dialog 1064
+DLG_EXITWINDOWS_WIN98 DIALOG DISCARDABLE  0, 0, 211, 127
+STYLE DS_MODALFRAME | DS_CENTER | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Shut Down Windows"
+FONT 8, "MS Shell Dlg"
+BEGIN
+    ICON            0,IDD_SHUTDOWNICON,7,11,18,20
+    LTEXT           "What do you want the computer to do?",-1,38,11,151,10
+    CONTROL         "S&tand by",IDD_SLEEP,"Button",
+                    BS_AUTORADIOBUTTON,38,27,155,10
+    // Stand by (with wakeup events disabled) REMOVED
+    // Dialog size and control positions shifted to account for this
+    CONTROL         "&Hibernate",IDD_HIBERNATE,"Button",
+                    BS_AUTORADIOBUTTON,38,39,155,10
+    CONTROL         "&Shut down",IDD_SHUTDOWN,"Button",
+                    BS_AUTORADIOBUTTON,38,51,155,10
+    CONTROL         "&Restart",IDD_RESTART,"Button",
+                    BS_AUTORADIOBUTTON,38,63,155,10
+    CONTROL         "Restart in &MS-DOS mode",
+                    IDD_RESTARTDOS,"Button",BS_AUTORADIOBUTTON,38,75,175,10
+    CONTROL         "&Log off",
+                    IDD_LOGOFF,"Button",BS_AUTORADIOBUTTON,38,87,175,10
+    DEFPUSHBUTTON   "OK",IDOK,39,108,52,14
+    PUSHBUTTON      "Cancel",IDCANCEL,95,108,52,14
+    PUSHBUTTON      "&Help",IDHELP,151,108,52,14
+END
+
+// Windows 2000 logoff
+// shell32.dll 5.0.2195 dialog 1071
+DLG_LOGOFFWINDOWS DIALOGEX 0, 0, 188, 60
+STYLE DS_MODALFRAME | DS_SHELLFONT | DS_CENTER | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Log Off Windows"
+FONT 8, "MS Shell Dlg"
+BEGIN
+    ICON            0, IDD_LOGOFFICON, 8, 6, 21, 20, SS_REALSIZECONTROL
+    LTEXT           "Are you sure you want to log off?", IDC_STATIC, 49, 15, 131, 8
+    DEFPUSHBUTTON   "&Yes", IDOK, 49, 38, 43, 14
+    PUSHBUTTON      "&No", IDCANCEL, 99, 38, 43, 14
+END
+
+// Windows 98 logoff
+// shell32.dll 4.72.XXXX dialog 1071
+// Separate because of different fonts in other languages
+DLG_LOGOFFWINDOWS_WIN98 DIALOGEX 0, 0, 188, 60
+STYLE DS_MODALFRAME | DS_SHELLFONT | DS_CENTER | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Log Off Windows"
+FONT 8, "MS Shell Dlg"
+BEGIN
+    ICON            0, IDD_LOGOFFICON, 8, 6, 21, 20, SS_REALSIZECONTROL
+    LTEXT           "Are you sure you want to log off?", IDC_STATIC, 49, 15, 131, 8
+    DEFPUSHBUTTON   "&Yes", IDOK, 49, 38, 43, 14
+    PUSHBUTTON      "&No", IDCANCEL, 99, 38, 43, 14
+END
+
+// Windows XP shutdown
+// msgina.dll 5.1.2600 or 5.2.3790 dialog 20100
+IDD_TURNOFFCOMPUTER DIALOGEX DISCARDABLE  0, 0, 208, 122
+STYLE DS_SYSMODAL | DS_SETFOREGROUND | WS_POPUP | WS_BORDER
+FONT 8, "MS Shell Dlg"
+BEGIN
+    PUSHBUTTON      "Cancel",IDCANCEL,161,103,40,12
+    CONTROL         "Flag"              ,IDC_TITLE_FLAG      ,"Static",SS_OWNERDRAW                         ,176,0,32,26
+    CONTROL         "Turn off computer" ,IDC_TITLE_TURNOFF   ,"Static",SS_OWNERDRAW                         ,7,0,162,26
+    CONTROL         "&Stand By"         ,IDC_BUTTON_STANDBY  ,"Button",BS_OWNERDRAW | BS_NOTIFY | WS_TABSTOP,36,49,22,20
+    CONTROL         "T&urn Off"         ,IDC_BUTTON_TURNOFF  ,"Button",BS_OWNERDRAW | BS_NOTIFY | WS_TABSTOP,93,49,22,20
+    CONTROL         "&Restart"          ,IDC_BUTTON_RESTART  ,"Button",BS_OWNERDRAW | BS_NOTIFY | WS_TABSTOP,150,49,22,20
+    CONTROL         "&Hibernate"        ,IDC_BUTTON_HIBERNATE,"Button",               BS_NOTIFY             ,30093,30049,22,20
+    CONTROL         ""                  ,IDC_TEXT_STANDBY    ,"Static",SS_OWNERDRAW | WS_DISABLED           ,22,73,50,8
+    CONTROL         ""                  ,IDC_TEXT_TURNOFF    ,"Static",SS_OWNERDRAW | WS_DISABLED           ,79,73,50,8
+    CONTROL         ""                  ,IDC_TEXT_RESTART    ,"Static",SS_OWNERDRAW | WS_DISABLED           ,136,73,50,8
+END
+
+// Windows XP logoff
+// shell32.dll 5.1.2600 or 5.2.3790 dialog 1089
+DLG_SWITCHUSER DIALOGEX DISCARDABLE  0, 0, 208, 122
+STYLE DS_SYSMODAL | DS_SETFOREGROUND | WS_POPUP | WS_BORDER
+FONT 8, "MS Shell Dlg"
+BEGIN
+    PUSHBUTTON      "&Cancel",IDCANCEL,161,103,40,12
+    CONTROL         "Flag"              ,IDC_TITLE_FLAG       ,"Static",SS_OWNERDRAW                          ,176,0,32,26
+    CONTROL         "Log Off Windows"   ,IDC_TITLE_SWITCHUSER ,"Static",SS_OWNERDRAW                          ,7,0,162,26
+    CONTROL         "&Switch User"      ,IDC_BUTTON_SWITCHUSER,"Button",BS_OWNERDRAW | BS_NOTIFY | WS_TABSTOP ,55,49,22,20
+    CONTROL         "&Log Off"          ,IDC_BUTTON_LOGOFF    ,"Button",BS_OWNERDRAW | BS_NOTIFY | WS_TABSTOP ,132,49,22,20
+    CONTROL         ""                  ,IDC_TEXT_SWITCHUSER  ,"Static",SS_OWNERDRAW             | WS_DISABLED,41,73,50,8
+    CONTROL         ""                  ,IDC_TEXT_LOGOFF      ,"Static",SS_OWNERDRAW             | WS_DISABLED,118,73,50,8
+END
+
+// Windows XP disconnect
+// shell32.dll 5.1.2600 or 5.2.3790 dialog 1090
+DLG_DISCONNECTWINDOWS DIALOGEX 0, 0, 188, 60
+STYLE DS_MODALFRAME | DS_SHELLFONT | DS_CENTER | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Disconnect Windows"
+FONT 8, "MS Shell Dlg"
+BEGIN
+    ICON            0, IDD_DISCONNECTICON, 8, 6, 21, 20, SS_REALSIZECONTROL
+    LTEXT           "Are you sure you want to disconnect?", IDC_STATIC, 49, 15, 131, 8
+    DEFPUSHBUTTON   "&Disconnect", IDOK, 47, 38, 47, 14
+    PUSHBUTTON      "Cancel", IDCANCEL, 99, 38, 47, 14
+END

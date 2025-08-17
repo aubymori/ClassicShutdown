@@ -1,94 +1,217 @@
-#pragma code_page(65001)
-#include <windows.h>
-#include "resource.h"
+﻿#include <windows.h>
+#include <winres.h>
+#include "Resource.h"
+
+#include "Version.rc"
 
 LANGUAGE LANG_JAPANESE, SUBLANG_JAPANESE_JAPAN
 
-/* Main (classic) */
-IDD_EXITWINDOWS DIALOG 0, 0, 274, 103
-STYLE DS_SHELLFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
-CAPTION "Windows のシャットダウン"
-FONT 8, "MS Shell Dlg 2"
-{
-	CONTROL 0, IDD_EXITWINDOWS_ICON, STATIC, SS_ICON | WS_CHILD | WS_VISIBLE | WS_GROUP, 7, 7, 20, 20
-	CONTROL "実行する操作を選んでください（&W）", -1, STATIC, SS_LEFT | WS_CHILD | WS_VISIBLE | WS_GROUP, 39, 7, 153, 10
-	CONTROL "", IDD_EXITWINDOWS_COMBOBOX, COMBOBOX, CBS_DROPDOWNLIST | WS_CHILD | WS_VISIBLE | WS_VSCROLL | WS_TABSTOP, 39, 20, 180, 57
-	CONTROL "", IDD_EXITWINDOWS_LABEL, STATIC, SS_LEFT | WS_CHILD | WS_VISIBLE | WS_GROUP, 39, 40, 180, 33
-	CONTROL "OK", IDOK, BUTTON, BS_DEFPUSHBUTTON | WS_CHILD | WS_VISIBLE | WS_GROUP | WS_TABSTOP, 108, 82, 50, 14
-	CONTROL "キャンセル", IDCANCEL, BUTTON, BS_PUSHBUTTON | WS_CHILD | WS_VISIBLE | WS_TABSTOP, 162, 82, 50, 14
-	CONTROL "ヘルプ（&H）", IDHELP, BUTTON, BS_PUSHBUTTON | WS_CHILD | WS_VISIBLE | WS_TABSTOP, 216, 82, 50, 14
-}
-
-IDD_LOGOFFWINDOWS DIALOGEX 0, 0, 188, 60
-STYLE DS_SHELLFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
-CAPTION "Windows のログオフ"
-FONT 8, "MS Shell Dlg 2"
-{
-	CONTROL 0, IDD_LOGOFFWINDOWS_ICON, STATIC, SS_ICON | WS_CHILD | WS_VISIBLE, 8, 6, 18, 20
-	CONTROL "ログオフしますか？", -1, STATIC, SS_LEFT | WS_CHILD | WS_VISIBLE | WS_GROUP, 49, 15, 131, 8
-	CONTROL "はい（&Y）", IDOK, BUTTON, BS_DEFPUSHBUTTON | WS_CHILD | WS_VISIBLE | WS_TABSTOP, 49, 38, 43, 14
-	CONTROL "いいえ（&N）", IDCANCEL, BUTTON, BS_PUSHBUTTON | WS_CHILD | WS_VISIBLE | WS_TABSTOP, 99, 38, 43, 14
-}
-
-STRINGTABLE
-{
-	IDS_LOGOFF        "%sのログオフ"
-	IDS_LOGOFF_DESC   "コンピュータを通常の電力で実行したままセッションを終了します。"
-	IDS_SHUTDOWN      "シャットダウン"
-	IDS_SHUTDOWN_DESC "電源を安全に切れるよう、 セッションを終了し、 Windows をシャットダウンします。"
-	IDS_RESTART       "再起動"
-	IDS_RESTART_DESC  "セッションを終了し、Windows をシャットダウンして再起動します。"
-	IDS_STANDBY       "スタンバイ"
-	IDS_STANDBY_DESC  "データがメモリにある状態で、コンピュータを低電力で実行したままセッションを維持します。"
-	IDS_HIBER         "休止状態"
-	IDS_HIBER_DESC    "セッションをディスクに保存して、電源を安全に切れるようにします。セッションは次回 Windows を再起動すると復元されます。"
-	IDS_LOGOFF_BTN    "ログオフ（&L）"
-	IDS_CANCEL_BTN    "キャンセル"
-}
-
-/* XP friendly */
-IDD_EXITWINDOWS_FRIENDLY DIALOGEX DISCARDABLE  0, 0, 208, 122
-STYLE DS_SYSMODAL | DS_SETFOREGROUND | WS_POPUP | WS_BORDER
-FONT 8, "MS Shell Dlg"
-{
-	PUSHBUTTON      "キャンセル", IDCANCEL, 161, 103, 40, 12
-	CONTROL         "フラグ", IDC_TITLE_FLAG, "Static", SS_OWNERDRAW, 176, 0, 32, 26
-	CONTROL         "コンピュータの電源を切る", IDC_TITLE_TURNOFF, "Static", SS_OWNERDRAW | WS_VISIBLE, 7, 0, 162, 26
-	CONTROL         "スタンバイ（&S）", IDC_BUTTON_STANDBY, "Button", BS_OWNERDRAW | BS_NOTIFY | WS_TABSTOP, 36, 49, 22, 20
-	CONTROL         "電源を切る（&U）", IDC_BUTTON_TURNOFF, "Button", BS_OWNERDRAW | BS_NOTIFY | WS_TABSTOP, 93, 49, 22, 20
-	CONTROL         "再起動（&R）", IDC_BUTTON_RESTART, "Button", BS_OWNERDRAW | BS_NOTIFY | WS_TABSTOP, 150, 49, 22, 20
-	CONTROL         "休止状態(&H)", IDC_BUTTON_HIBERNATE, BUTTON, BS_PUSHBUTTON | BS_NOTIFY | WS_CHILD | WS_VISIBLE, 30093, 30049, 22, 20
-	CONTROL         "", IDC_TEXT_STANDBY, "Static", SS_OWNERDRAW | WS_DISABLED, 20, 73, 54, 8
-	CONTROL         "", IDC_TEXT_TURNOFF, "Static", SS_OWNERDRAW | WS_DISABLED, 77, 73, 54, 8
-	CONTROL         "", IDC_TEXT_RESTART, "Static", SS_OWNERDRAW | WS_DISABLED, 134, 73, 54, 8
-}
-
-IDD_LOGOFFWINDOWS_FRIENDLY DIALOGEX DISCARDABLE  0, 0, 208, 122
-STYLE DS_SYSMODAL | DS_SETFOREGROUND | WS_POPUP | WS_BORDER
-FONT 8, "MS Shell Dlg"
-{
-	PUSHBUTTON      "キャンセル（&C）", IDCANCEL, 149, 103, 52, 12
-	CONTROL         "フラグ", IDC_TITLE_FLAG, "Static", SS_OWNERDRAW, 176, 0, 32, 26
-	CONTROL         "Windows のログオフ", IDC_TITLE_SWITCHUSER, "Static", SS_OWNERDRAW, 7, 0, 162, 26
-	CONTROL         "ユーザーの切り替え（&S）", IDC_BUTTON_SWITCHUSER, "Button", BS_OWNERDRAW | BS_NOTIFY | WS_TABSTOP, 55, 49, 22, 20
-	CONTROL         "ログオフ（&L）", IDC_BUTTON_LOGOFF, "Button", BS_OWNERDRAW | BS_NOTIFY | WS_TABSTOP, 132, 49, 22, 20
-	CONTROL         "", IDC_TEXT_SWITCHUSER, "Static", SS_OWNERDRAW | WS_DISABLED, 24, 73, 82, 8
-	CONTROL         "", IDC_TEXT_LOGOFF, "Static", SS_OWNERDRAW | WS_DISABLED, 118, 73, 50, 8
-}
-
 STRINGTABLE DISCARDABLE
-{
-	IDS_GENERIC_CAPTION                         "Windows　のログオン"
+BEGIN
+    // shell32.dll 5.1.2600 or 5.2.3790 dialog 1071, item IDOK (1)
+    IDS_LOGOFF_YES_XP                               "ログオフ(&L)"
+    // shell32.dll 5.1.2600 or 5.2.3790 dialog 1071, item IDCANCEL (2)
+    IDS_LOGOFF_NO_XP                                "キャンセル"
 
-	IDS_TURNOFF_TITLE_FACENAME                  "Franklin Gothic"
-	IDS_TURNOFF_TITLE_FACESIZE                  "14"
-	IDS_TURNOFF_BUTTON_FACENAME                 "Tahoma"
-	IDS_TURNOFF_BUTTON_FACESIZE                 "8"
-	IDS_TURNOFF_TOOLTIP_TEXT_TURNOFF            "安全にコンピュータの電源を切るために Windows をシャットダウンします。"
-	IDS_TURNOFF_TOOLTIP_TEXT_STANDBY            "コンピュータを低電力の状態にし、 Windows セッションをすばやく再開できるようにします。"
-	IDS_TURNOFF_TOOLTIP_TEXT_STANDBY_HIBERNATE  "コンピュータを低電力の状態にし、Windows セッションをすばやく再開できるようにします。\r\n\r\n休止状態にするには、Shift キーを押してください。"
-	IDS_TURNOFF_TOOLTIP_TEXT_HIBERNATE          "現在のデスクトップの状態をハード ディスクに保存し、コンピュータをシャットダウンします。次回起動したときには、現在の状態が再現されます。"
-	IDS_TURNOFF_TOOLTIP_TEXT_RESTART            "Windows をシャットダウンして再起動します。"
-	IDS_SWITCHUSER_TOOLTIP_TEXT_SWITCHUSER      "プログラムやファイルが開いたままで、ほかのユーザーがログオンできます。\r\n\r\n(Windows ロゴキーと "L" を同時に押すとユーザーを切り替えることができます。)"
-	IDS_SWITCHUSER_TOOLTIP_TEXT_LOGOFF          "プログラムを閉じて Windows セッションを終了します。"
-}
+    // msgina.dll 5.0.2195 strings 8000-8015
+    IDS_SHUTDOWN_NAME                               "シャットダウン"
+    IDS_SHUTDOWN_DESC                               "電源を安全に切れるよう、セッションを終了し、Windows をシャットダウンします。"
+    IDS_RESTART_NAME                                "再起動"
+    IDS_RESTART_DESC                                "セッションを終了し、Windows をシャットダウンして再起動します。"
+    IDS_SLEEP_NAME                                  "スタンバイ"
+    IDS_SLEEP_DESC                                  "データがメモリにある状態で、コンピュータを低電力で実行したままセッションを維持します。"
+    // SLEEP2 (8006, 8007) not included, IGNORE
+    IDS_HIBERNATE_NAME                              "休止状態"
+    IDS_HIBERNATE_DESC                              "セッションをディスクに保存して、電源を安全に切れるようにします。セッションは次回 Windows を再起動すると復元されます。"
+    IDS_LOGOFF_NAME                                 "%s のログオフ"
+    IDS_LOGOFF_DESC                                 "コンピュータを通常の電力で実行したままセッションを終了します。"
+    IDS_RESTARTDOS_NAME                             "MS-DOS モードで再起動する"
+    IDS_RESTARTDOS_DESC                             "セッションを終了し、Windows をシャットダウンして MS-DOS モードを起動します。"
+    IDS_DISCONNECT_NAME                             "切断"
+    IDS_DISCONNECT_DESC                             "セッションを切断します。ログオンし直すと、このセッションに再接続できます。"
+
+    // msgina.dll 5.1.2600 or 5.2.3790 strings 20125-20128
+    IDS_TURNOFF_TITLE_FACENAME                      "MS UI Gothic"
+    IDS_TURNOFF_TITLE_FACESIZE                      "14"
+    IDS_TURNOFF_BUTTON_FACENAME                     "MS UI Gothic"
+    IDS_TURNOFF_BUTTON_FACESIZE                     "9"
+
+    // msgina.dll 5.1.2600 or 5.2.3790 strings 20129-20133
+    IDS_TURNOFF_TOOLTIP_TEXT_TURNOFF                "安全にコンピュータの電源を切るために Windows をシャットダウンします。"
+    IDS_TURNOFF_TOOLTIP_TEXT_STANDBY                "コンピュータを低電力の状態にし、Windows セッションをすばやく再開できるようにします。"
+    IDS_TURNOFF_TOOLTIP_TEXT_STANDBY_HIBERNATE      "コンピュータを低電力の状態にし、Windows セッションをすばやく再開できるようにします。\r\n\r\n休止状態にするには、Shift キーを押してください。"
+    IDS_TURNOFF_TOOLTIP_TEXT_RESTART                "Windows をシャットダウンして再起動します。"
+    IDS_TURNOFF_TOOLTIP_TEXT_HIBERNATE              "現在のデスクトップの状態をハード ディスクに保存し、コンピュータをシャットダウンします。次回起動したときには、現在の状態が再現されます。"
+    
+    // shell32.dll 5.1.2600 or 5.2.3790 strings 14349 and 14350
+    IDS_SWITCHUSER_TOOLTIP_TEXT_SWITCHUSER          "プログラムやファイルが開いたままで、ほかのユーザーがログオンできます。\r\n\r\n(Windows ロゴ キーと ""L"" を同時に押すとユーザーを切り替えることができます。)"                                          
+    IDS_SWITCHUSER_TOOLTIP_TEXT_LOGOFF              "プログラムを閉じて Windows セッションを終了します。"
+END
+
+// Windows 2000 shutdown
+// msgina.dll 5.0.2195 dialog 2200
+IDD_EXITWINDOWS_DIALOG DIALOGEX 0, 0, 274, 103
+STYLE DS_MODALFRAME | DS_SHELLFONT | DS_CENTER | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Windows のシャットダウン"
+FONT 9, "MS UI Gothic", 0, 0, 128
+BEGIN
+    ICON            0,IDC_EXITWINDOWS_ICON,13,7,21,20,WS_GROUP
+    LTEXT           "次の中から選んでください。",IDC_STATIC,44,7,
+                    173,10
+    COMBOBOX        IDC_EXITOPTIONS_COMBO,44,20,173,57,CBS_DROPDOWNLIST | 
+                    WS_VSCROLL | WS_TABSTOP
+    // REMOVE this placeholder text, but not the item itself
+    LTEXT           "",IDC_EXITOPTIONS_DESCRIPTION,44,40,173,33
+    DEFPUSHBUTTON   "OK",IDOK,109,82,50,14,WS_GROUP
+    PUSHBUTTON      "キャンセル",IDCANCEL,163,82,50,14
+    PUSHBUTTON      "ヘルプ(&H)",IDHELP,217,82,50,14
+END
+
+// Windows Me shutdown
+// shell32.dll 5.50.XXXX dialog 8226
+IDD_EXITWINDOWS_DIALOG_WINME DIALOG DISCARDABLE  0, 0, 211, 103
+STYLE DS_MODALFRAME | DS_SHELLFONT | DS_CENTER | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Windows のシャットダウン"
+FONT 9, "MS UI Gothic"
+BEGIN
+    ICON            0,IDC_EXITWINDOWS_ICON,7,7,18,18,WS_GROUP | SS_REALSIZECONTROL
+    LTEXT           "次の中から選んでください。",-1,39,7,153,10
+    COMBOBOX        IDC_EXITOPTIONS_COMBO,39,20,165,57,CBS_DROPDOWNLIST |
+                    WS_VSCROLL | WS_TABSTOP
+    // REMOVE this placeholder text, but not the item itself
+    LTEXT           "",
+                    IDC_EXITOPTIONS_DESCRIPTION,39,40,165,33
+    DEFPUSHBUTTON   "OK",IDOK,46,82,50,14,WS_GROUP
+    PUSHBUTTON      "キャンセル",IDCANCEL,100,82,50,14
+    PUSHBUTTON      "ヘルプ(&H)",IDHELP,154,82,50,14
+END
+
+// Windows 95/NT 4.0 shutdown
+// Derived from shell32.dll 95 4.0.0.1111 dialog 1064
+DLG_EXITWINDOWS_WIN95 DIALOG DISCARDABLE  0, 0, 220, 147
+STYLE DS_MODALFRAME | DS_CENTER | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Windows の終了"
+FONT 9, "MS Shell Dlg"
+BEGIN
+    LTEXT           "次の方法で終了してもよろしいですか?",-1,40,9,164,12
+    // BEGIN CUSTOM STRINGS
+    // Dialog size and control positions are shifted to account for new items
+    CONTROL         "ｺﾝﾋﾟｭｰﾀをｽﾀﾝﾊﾞｲにする(&T)",IDD_SLEEP,"Button",
+                    BS_AUTORADIOBUTTON,38,28,155,10
+    CONTROL         "ｺﾝﾋﾟｭｰﾀを休止状態にする(&H)",IDD_HIBERNATE,"Button",
+                    BS_AUTORADIOBUTTON,38,42,155,10
+    // END CUSTOM STRINGS
+    CONTROL         "ｺﾝﾋﾟｭｰﾀの電源を切れる状態にする(&S)",IDD_SHUTDOWN,"Button",
+                    BS_AUTORADIOBUTTON,38,56,155,10
+    CONTROL         "ｺﾝﾋﾟｭｰﾀを再起動する(&R)",IDD_RESTART,"Button",
+                    BS_AUTORADIOBUTTON,38,70,155,10
+    CONTROL         "MS-DOS ﾓｰﾄﾞでｺﾝﾋﾟｭｰﾀを再起動する(&M)",
+                    IDD_RESTARTDOS,"Button",BS_AUTORADIOBUTTON,38,84,175,10
+    CONTROL         "ｱﾌﾟﾘｹｰｼｮﾝを終了し、Windows にﾛｸﾞｵﾝし直す(&C)",
+                    IDD_LOGOFF,"Button",BS_AUTORADIOBUTTON,38,98,175,10
+    ICON            0,IDD_SHUTDOWNICON,9,11,18,20
+    DEFPUSHBUTTON   "はい(&Y)",IDOK,48,125,52,14
+    PUSHBUTTON      "いいえ(&N)",IDCANCEL,102,125,52,14
+    PUSHBUTTON      "ﾍﾙﾌﾟ(&H)",IDHELP,157,125,52,14
+END
+
+// Windows 98 shutdown
+// Derived from shell32.dll 4.72.XXXX dialog 1064
+DLG_EXITWINDOWS_WIN98 DIALOG DISCARDABLE  0, 0, 211, 127
+STYLE DS_MODALFRAME | DS_CENTER | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Windows の終了"
+FONT 9, "MS Shell Dlg"
+BEGIN
+    ICON            0,IDD_SHUTDOWNICON,7,11,18,20
+    LTEXT           "次の方法で終了しますか?",-1,38,11,151,10
+    CONTROL         "スタンバイ(&T)",IDD_SLEEP,"Button",
+                    BS_AUTORADIOBUTTON,38,27,155,10
+    // Stand by (with wakeup events disabled) REMOVED
+    // Dialog size and control positions shifted to account for this
+    CONTROL         "休止状態にする(&I)",IDD_HIBERNATE,"Button",
+                    BS_AUTORADIOBUTTON,38,39,155,10
+    CONTROL         "電源を切れる状態にする(&S)",IDD_SHUTDOWN,"Button",
+                    BS_AUTORADIOBUTTON,38,51,155,10
+    CONTROL         "再起動する(&R)",IDD_RESTART,"Button",
+                    BS_AUTORADIOBUTTON,38,63,155,10
+    CONTROL         "MS-DOS モードで再起動する(&M)",
+                    IDD_RESTARTDOS,"Button",BS_AUTORADIOBUTTON,38,75,175,10
+    CONTROL         "ログオフする(&L)",
+                    IDD_LOGOFF,"Button",BS_AUTORADIOBUTTON,38,87,175,10
+    DEFPUSHBUTTON   "OK",IDOK,39,108,52,14
+    PUSHBUTTON      "キャンセル",IDCANCEL,95,108,52,14
+    PUSHBUTTON      "ヘルプ(&H)",IDHELP,151,108,52,14
+END
+
+// Windows 2000 logoff
+// shell32.dll 5.0.2195 dialog 1071
+DLG_LOGOFFWINDOWS DIALOGEX 0, 0, 188, 60
+STYLE DS_MODALFRAME | DS_SHELLFONT | DS_CENTER | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Windows のログオフ"
+FONT 9, "MS UI Gothic"
+BEGIN
+    ICON            0, IDD_LOGOFFICON, 8, 6, 18, 20, SS_REALSIZECONTROL
+    LTEXT           "ログオフしますか?", IDC_STATIC, 49, 15, 131, 8
+    DEFPUSHBUTTON   "はい(&Y)", IDOK, 49, 38, 43, 14
+    PUSHBUTTON      "いいえ(&N)", IDCANCEL, 99, 38, 43, 14
+END
+
+// Windows 98 logoff
+// shell32.dll 4.72.XXXX dialog 1071
+// Separate because of different fonts in other languages
+DLG_LOGOFFWINDOWS_WIN98 DIALOGEX 0, 0, 188, 60
+STYLE DS_MODALFRAME | DS_SHELLFONT | DS_CENTER | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Windows のログオフ"
+FONT 9, "MS Shell Dlg"
+BEGIN
+    ICON            0, IDD_LOGOFFICON, 8, 6, 18, 20, SS_REALSIZECONTROL
+    LTEXT           "ログオフしますか?", IDC_STATIC, 49, 15, 131, 8
+    DEFPUSHBUTTON   "はい(&Y)", IDOK, 49, 38, 43, 14
+    PUSHBUTTON      "いいえ(&N)", IDCANCEL, 99, 38, 43, 14
+END
+
+// Windows XP shutdown
+// msgina.dll 5.1.2600 or 5.2.3790 dialog 20100
+IDD_TURNOFFCOMPUTER DIALOGEX DISCARDABLE  0, 0, 208, 121
+STYLE DS_SYSMODAL | DS_SETFOREGROUND | WS_POPUP | WS_BORDER
+FONT 9, "MS UI Gothic"
+BEGIN
+    PUSHBUTTON      "キャンセル",IDCANCEL,161,103,40,14
+    CONTROL         "フラグ"                 ,IDC_TITLE_FLAG      ,"Static",SS_OWNERDRAW                         ,176,0,32,26
+    CONTROL         "コンピュータの電源を切る" ,IDC_TITLE_TURNOFF   ,"Static",SS_OWNERDRAW                         ,7,0,162,26
+    CONTROL         "スタンバイ(&S)"          ,IDC_BUTTON_STANDBY  ,"Button",BS_OWNERDRAW | BS_NOTIFY | WS_TABSTOP,36,49,22,20
+    CONTROL         "電源を切る(&U)"          ,IDC_BUTTON_TURNOFF  ,"Button",BS_OWNERDRAW | BS_NOTIFY | WS_TABSTOP,93,49,22,20
+    CONTROL         "再起動(&R)"             ,IDC_BUTTON_RESTART  ,"Button",BS_OWNERDRAW | BS_NOTIFY | WS_TABSTOP,150,49,22,20
+    CONTROL         "休止状態(&H)"            ,IDC_BUTTON_HIBERNATE,"Button",               BS_NOTIFY             ,18724,21845,22,20
+    CONTROL         ""                       ,IDC_TEXT_STANDBY    ,"Static",SS_OWNERDRAW | WS_DISABLED           ,22,73,50,8
+    CONTROL         ""                       ,IDC_TEXT_TURNOFF    ,"Static",SS_OWNERDRAW | WS_DISABLED           ,79,73,50,8
+    CONTROL         ""                       ,IDC_TEXT_RESTART    ,"Static",SS_OWNERDRAW | WS_DISABLED           ,136,73,50,8
+END
+
+// Windows XP logoff
+// shell32.dll 5.1.2600 or 5.2.3790 dialog 1089
+DLG_SWITCHUSER DIALOGEX DISCARDABLE  0, 0, 208, 122
+STYLE DS_SYSMODAL | DS_SETFOREGROUND | WS_POPUP | WS_BORDER
+FONT 9, "MS UI Gothic"
+BEGIN
+    PUSHBUTTON      "キャンセル(&C)",IDCANCEL,154,103,47,14
+    CONTROL         "Flag"                    ,IDC_TITLE_FLAG       ,"Static",SS_OWNERDRAW                          ,176,0,32,26
+    CONTROL         "Windows のログオフ"       ,IDC_TITLE_SWITCHUSER ,"Static",SS_OWNERDRAW                          ,7,0,162,26
+    CONTROL         "ユーザーの切り替え(&S)"   ,IDC_BUTTON_SWITCHUSER,"Button",BS_OWNERDRAW | BS_NOTIFY | WS_TABSTOP ,55,49,22,20
+    CONTROL         "ログオフ(&L)"             ,IDC_BUTTON_LOGOFF    ,"Button",BS_OWNERDRAW | BS_NOTIFY | WS_TABSTOP ,132,49,22,20
+    CONTROL         ""                        ,IDC_TEXT_SWITCHUSER  ,"Static",SS_OWNERDRAW             | WS_DISABLED,26,73,77,10
+    CONTROL         ""                        ,IDC_TEXT_LOGOFF      ,"Static",SS_OWNERDRAW             | WS_DISABLED,107,73,77,10
+END
+
+// Windows XP disconnect
+// shell32.dll 5.1.2600 or 5.2.3790 dialog 1090
+DLG_DISCONNECTWINDOWS DIALOGEX 0, 0, 188, 60
+STYLE DS_MODALFRAME | DS_SHELLFONT | DS_CENTER | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Windows の切断"
+FONT 9, "MS UI Gothic"
+BEGIN
+    ICON            0, IDD_DISCONNECTICON, 8, 6, 21, 20, SS_REALSIZECONTROL
+    LTEXT           "切断しますか?", IDC_STATIC, 49, 15, 131, 8
+    DEFPUSHBUTTON   "切断(&D)", IDOK, 47, 38, 47, 14
+    PUSHBUTTON      "キャンセル", IDCANCEL, 99, 38, 47, 14
+END

@@ -1,0 +1,7 @@
+#include <ntverp.h>
+#include "Version.h"
+#define VER_FILETYPE                    VFT_DLL
+#define VER_FILEDESCRIPTION_STR         "ClassicShutdown DLL"
+#define VER_INTERNALNAME_STR            "ClassicShutdown"
+#define VER_ORIGINALFILENAME_STR        "ClassicShutdown.dll"
+#include <common.ver>

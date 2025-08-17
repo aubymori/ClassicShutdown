@@ -1,390 +1,276 @@
-#include <windows.h>
-#include <wtsapi32.h>
-#include <powrprof.h>
-#include <winnls.h>
-
-#include "ClassicShutdown.h"
-#include "ExitWindowsDlg.h"
-#include "LogoffDlg.h"
-#include "FriendlyDlg.h"
+#include "ClassicShutdownP.h"
+#include "DitheredWindow.h"
 #include "DimmedWindow.h"
+#include "2KShutdownDialog.h"
+#include "9xShutdownDialog.h"
+#include "FriendlyDialog.h"
+#include "LogoffDialog.h"
+#include "DisconnectDialog.h"
 
-const WCHAR DITHER_CLSNAME[] = L"ClassicShutdown_Dither";
+HINSTANCE g_hinst;
+HINSTANCE g_hinstShell;
+DWORD     g_dwStyle;
+bool      g_fStandByAvailable;
+bool      g_fHibernationAvailable;
+bool      g_fRemoteSession;
 
-HWND          g_hDesktopWnd, g_hDlg;
-HBITMAP       g_hbDesktop;
-HINSTANCE     g_hAppInstance, g_hShell32;
-BOOL          g_bLogoff;
-BOOL          g_bHibernationAvailable;
-SHUTDOWNSTYLE g_ssStyle;
-
-BrandingLoadImage_t BrandingLoadImage = nullptr;
-
-/* Virtual screen metrics */
-int x, y, cx, cy;
-
-/* Center dialog */
-void PositionDlg(HWND hDlg)
+void *operator new(size_t size)
 {
-    RECT rc;
-    GetWindowRect(hDlg, &rc);
-
-    SetWindowPos(
-        hDlg,
-        HWND_TOP,
-        (GetSystemMetrics(SM_CXSCREEN) - (rc.right - rc.left)) / 2,
-        (GetSystemMetrics(SM_CYSCREEN) - (rc.bottom - rc.top)) / 3,
-        0, 0,
-        SWP_NOSIZE
-    );
+	return HeapAlloc(GetProcessHeap(), 0, size);
 }
 
-void HandleShutdown(HWND hWnd, DWORD dwCode)
+void operator delete(void *ptr)
 {
-    switch (dwCode)
-    {
-        case SHTDN_NONE:
-            break;
-        case SHTDN_LOGOFF:
-            ExitWindowsEx(EWX_LOGOFF, 0);
-            break;
-        case SHTDN_SHUTDOWN:
-            InitiateSystemShutdownW(
-                NULL,
-                NULL,
-                0,
-                FALSE,
-                FALSE
-            );
-            break;
-        case SHTDN_RESTART:
-            ExitWindowsEx(EWX_REBOOT, 0);
-            break;
-        case SHTDN_STANDBY:
-            SetSuspendState(FALSE, TRUE, FALSE);
-            break;
-        case SHTDN_HIBER:
-            SetSuspendState(TRUE, FALSE, FALSE);
-            break;
-        case SHTDN_DISCONNECT:
-            WTSDisconnectSession(WTS_CURRENT_SERVER_HANDLE, WTS_CURRENT_SESSION, FALSE);
-            break;
-        default:
-        {
-            WCHAR msg[256];
-            wsprintfW(msg, L"Invalid result %d received", dwCode);
-            MessageBoxW(NULL, msg, L"ClassicShutdown", MB_ICONERROR);
-        }
-    }
-
-    EndDialog(hWnd, 0);
+	HeapFree(GetProcessHeap(), 0, ptr);
 }
 
-const WORD GRAY_BITS[] = { 0x5555, 0xAAAA, 0x5555, 0xAAAA, 0x5555, 0xAAAA, 0x5555, 0xAAAA };
-
-#define  ROP_DPna  0x000A0329
-
-HBRUSH CreateDitheredBrush(void)
+void operator delete(void *ptr, size_t size)
 {
-    HBITMAP hBmp = CreateBitmap(8, 8, 1, 1, GRAY_BITS);
-    HBRUSH hbr = CreatePatternBrush(hBmp);
-    DeleteObject(hBmp);
-    return hbr;
+	HeapFree(GetProcessHeap(), 0, ptr);
 }
 
-void ScreenshotDesktop(void)
+EXTERN_C STDAPI_(BOOL) DllMain(
+	HINSTANCE hinstDLL,
+	DWORD     fdwReason,
+	LPVOID    lpvReserved)
 {
-    HDC hScreenDC = GetDC(NULL);
-    HDC hMemDC = CreateCompatibleDC(hScreenDC);
-
-    g_hbDesktop = CreateCompatibleBitmap(hScreenDC, cx, cy);
-    HBITMAP hbOld = (HBITMAP)SelectObject(hMemDC, g_hbDesktop);
-    BitBlt(
-        hMemDC,
-        0, 0,
-        cx, cy,
-        hScreenDC,
-        x, y,
-        SRCCOPY
-    );
-
-    DeleteDC(hMemDC);
-    ReleaseDC(NULL, hScreenDC);
+	switch (fdwReason)
+	{
+		case DLL_PROCESS_ATTACH:
+		{
+			g_hinst = hinstDLL;
+			break;
+		}
+		case DLL_PROCESS_DETACH:
+			if (g_hkey)
+				RegCloseKey(g_hkey);
+			if (g_hinstShell)
+				FreeLibrary(g_hinstShell);
+			break;
+	}
+	return TRUE;
 }
 
-LRESULT CALLBACK DitherWndProc(
-    HWND   hWnd,
-    UINT   uMsg,
-    WPARAM wParam,
-    LPARAM lParam
-)
+void UpdatePowerCapabilities()
 {
-    switch (uMsg)
-    {
-        /* Haha, no thanks. No clearing for me! */
-        case WM_ERASEBKGND:
-            return 0;
-        default:
-            return DefWindowProcW(hWnd, uMsg, wParam, lParam);
-    }
+	SYSTEM_POWER_CAPABILITIES spc;
+	ZeroMemory(&spc, sizeof(spc));
+	CallNtPowerInformation(
+		SystemPowerCapabilities,
+		nullptr, 0,
+		&spc, sizeof(spc)
+	);
+	g_fStandByAvailable     = spc.SystemS1 || spc.SystemS2 || spc.SystemS3;
+	g_fHibernationAvailable = spc.SystemS4 && spc.HiberFilePresent;
 }
 
-int WINAPI wWinMain(
-    _In_     HINSTANCE hInstance,
-    _In_opt_ HINSTANCE hPrevInstance,
-    _In_     LPWSTR    lpCmdLine,
-    _In_     int       nCmdShow
-)
+bool IsRemoteSession()
 {
-    HMODULE hWinBrand = LoadLibraryW(L"winbrand.dll");
-    if (hWinBrand)
-    {
-        BrandingLoadImage = (BrandingLoadImage_t)GetProcAddress(hWinBrand, "BrandingLoadImage");
-    }
-    if (!BrandingLoadImage)
-    {
-        ERRORANDQUIT(
-            L"Failed to load BrandingLoadImage from winbrand.dll"
-        );
-    }
+#if DEBUG
+	DWORD dwValue = 0;
+	DWORD cbValue = sizeof(DWORD);
+	RegGetValueW(
+		HKEY_CURRENT_USER,
+		REGSTR_PATH_CLASSICSHUTDOWN,
+		L"IsRemoteSession",
+		RRF_RT_REG_DWORD,
+		nullptr,
+		(LPVOID)&dwValue,
+		&cbValue
+	);
+	return dwValue != 0;
+#else
+	return GetSystemMetrics(SM_REMOTESESSION);
+#endif
+}
 
-    /* Nuke Open-Shell fader if it exists,
-       and simulate start menu delay */
-    HWND hFader = FindWindowW(L"OpenShell.CMenuFader", NULL);
-    if (hFader)
-    {
-        Sleep(100);
-        ShowWindow(hFader, SW_HIDE);
-    }
-    /* Windows XP Explorer creates one as well, but the
-       delay doesn't need to be simulated */
-    else if (hFader = FindWindowW(L"SysFader", NULL))
-    {
-        /* The SysFader runs a loop that locks up the message
-           loop, so we just make it completely transparent instead
-           of really hiding it. */
-        SetLayeredWindowAttributes(hFader, NULL, 0, LWA_ALPHA);
-    }
+CBaseBGWindow *CreateBGWindow(HWND hwndParent, bool fLogoff)
+{
+	if (hwndParent || DebuggerAttached() || g_fRemoteSession)
+		return nullptr;
 
-    /* Check if hibernation is available */
-    SYSTEM_POWER_CAPABILITIES spc = { 0 };
-    CallNtPowerInformation(
-        SystemPowerCapabilities,
-        NULL, NULL,
-        &spc, sizeof(spc)
-    );
-    g_bHibernationAvailable = spc.HiberFilePresent;
+	if (fLogoff)
+	{
+		switch (g_dwStyle)
+		{
+			case LOS_WIN2K:
+				return new CDitheredWindow;
+			case LOS_WINXP:
+			case LOS_WINXP_GINA:
+				return new CDimmedWindow;
+		}
+	}
+	else
+	{
+		switch (g_dwStyle)
+		{
+			case SDS_WIN95:
+			case SDS_WIN98:
+			case SDS_WINME:
+			case SDS_WIN2K:
+				return new CDitheredWindow;
+			case SDS_WINXP:
+			case SDS_WINXP_GINA:
+			case SDS_WIN03_GINA:
+				return new CDimmedWindow;
+		}
+	}
+}
 
-    CDimmedWindow *pDimmedWindow = NULL;
+HRESULT LoadShellModule(void)
+{
+	g_hinstShell = LoadLibraryExW(L"shell32.dll", NULL, LOAD_LIBRARY_SEARCH_SYSTEM32 | LOAD_LIBRARY_AS_DATAFILE);
+	if (!g_hinstShell)
+		return HRESULT_FROM_WIN32(GetLastError());
+	return S_OK;
+}
 
-    /* Set virtual screen metrics */
-    x = GetSystemMetrics(SM_XVIRTUALSCREEN);
-    y = GetSystemMetrics(SM_YVIRTUALSCREEN);
-    cx = GetSystemMetrics(SM_CXVIRTUALSCREEN);
-    cy = GetSystemMetrics(SM_CYVIRTUALSCREEN);
+CLASSICSHUTDOWN_API DisplayShutdownDialog(HWND hwndParent, SHUTDOWNSTYLE style, SHUTDOWNTYPE type, PSHUTDOWNOPTIONS pOptions)
+{
+	if (style < SDS_USER || style >= SDS_COUNT)
+		return E_INVALIDARG;
 
-    /* Apply the needed privilege for shutting down */
-    HANDLE hToken;
-    TOKEN_PRIVILEGES tp;
-    LUID luid;
+	if (style == SDS_USER)
+		RETURN_IF_FAILED(ReadSettingDWORD(CSDS_SHUTDOWNSTYLE, &style));
 
-    OpenProcessToken(GetCurrentProcess(), TOKEN_ADJUST_PRIVILEGES | TOKEN_QUERY, &hToken);
-    LookupPrivilegeValueW(NULL, SE_SHUTDOWN_NAME, &luid);
+	g_dwStyle = style;
+	RETURN_IF_FAILED(LoadShellModule());
+	UpdatePowerCapabilities();
+	g_fRemoteSession = IsRemoteSession();
+		
+	CBaseBGWindow *pBGWnd = CreateBGWindow(hwndParent, false);
+	if (pBGWnd)
+	{
+		pBGWnd->CreateAndShow();
+		hwndParent = pBGWnd->GetHWND();
+	}
 
-    tp.PrivilegeCount = 1;
-    tp.Privileges[0].Luid = luid;
-    tp.Privileges[0].Attributes = SE_PRIVILEGE_ENABLED;
+	CBaseDialog *pDialog = nullptr;
+	switch (style)
+	{
+		case SDS_WIN95:
+		case SDS_WIN98:
+			pDialog = new C9xShutdownDialog(type);
+			break;
+		case SDS_WINME:
+		case SDS_WIN2K:
+		case SDS_WINXP_GINA:
+		case SDS_WIN03_GINA:
+			pDialog = new C2KShutdownDialog(type, pOptions);
+			break;
+		case SDS_WINXP:
+			pDialog = new CFriendlyDialog(false);
+			break;
+	}
+	if (!pDialog)
+		return E_OUTOFMEMORY;
 
-    AdjustTokenPrivileges(hToken, FALSE, &tp, sizeof(TOKEN_PRIVILEGES), NULL, NULL);
+	INT_PTR nResult = pDialog->Show(hwndParent);
+	RETURN_IF_FAILED(DoShutdown((SHUTDOWNTYPE)nResult));
 
-    
-    g_hShell32 = LoadLibraryW(L"shell32.dll");
+	if (pBGWnd)
+		delete pBGWnd;
+	delete pDialog;
+	return S_OK;
+}
 
-    /* Parse command line */
-    int argc;
-    LPWSTR *argv = CommandLineToArgvW(
-        lpCmdLine, &argc
-    );
-    WCHAR szLocale[LOCALE_NAME_MAX_LENGTH] = { 0 };
-    for (int i = 0; i < argc; i++)
-    {
-        if (!_wcsicmp(argv[i], L"/logoff"))
-        {
-            g_bLogoff = TRUE;
-        }
-        else if (!_wcsicmp(argv[i], L"/style"))
-        {
-            if (i + 1 != argc)
-            {
-                if (!_wcsicmp(argv[i + 1], L"classic"))
-                {
-                    g_ssStyle = SS_CLASSIC;
-                }
-                else if (!_wcsicmp(argv[i + 1], L"xpclassic"))
-                {
-                    g_ssStyle = SS_XPCLASSIC;
-                }
-                else if (!_wcsicmp(argv[i + 1], L"xp"))
-                {
-                    g_ssStyle = SS_XPFRIENDLY;
-                }
-                else
-                {
-                    MessageBoxW(
-                        NULL,
-                        L"Invalid value defined for /style parameter, defaulting to classic style.",
-                        L"ClassicShutdown",
-                        MB_ICONWARNING
-                    );
-                    g_ssStyle = SS_CLASSIC;
-                }
+CLASSICSHUTDOWN_API DisplayLogoffDialog(HWND hwndParent, LOGOFFSTYLE style)
+{
+	if (style < LOS_USER || style >= LOS_COUNT)
+		return E_INVALIDARG;
 
-                i++;
-            }
-            else
-            {
-                MessageBoxW(
-                    NULL,
-                    L"No value defined for /style parameter, defaulting to classic style.",
-                    L"ClassicShutdown",
-                    MB_ICONWARNING
-                );
-                g_ssStyle = SS_CLASSIC;
-            }
-        }
-        else if (!_wcsicmp(argv[i], L"/lang"))
-        {
-            if (i + 1 != argc)
-            {
-                wcscpy_s(szLocale, LOCALE_NAME_MAX_LENGTH, argv[i + 1]);
-            }
-            else
-            {
-                MessageBoxW(
-                    NULL,
-                    L"No value defined for /lang parameter, defaulting to system locale.",
-                    L"ClassicShutdown",
-                    MB_ICONWARNING
-                );
-            }
-        }
-    }
+	if (style == LOS_USER)
+		RETURN_IF_FAILED(ReadSettingDWORD(CSDS_LOGOFFSTYLE, &style));
 
-    /* Set up HINSTANCEs */
-    g_hAppInstance = hInstance;
+	if (style == LOS_USER)
+	{
+		SHUTDOWNSTYLE shutdownStyle = SDS_USER;
+		RETURN_IF_FAILED(ReadSettingDWORD(CSDS_SHUTDOWNSTYLE, &shutdownStyle));
+		switch (shutdownStyle)
+		{
+			case SDS_WIN95:
+			case SDS_WIN98:
+				style = LOS_WIN98;
+				break;
+			case SDS_WINME:
+			case SDS_WIN2K:
+				style = LOS_WIN2K;
+				break;
+			case SDS_WINXP:
+				style = LOS_WINXP;
+				break;
+			case SDS_WINXP_GINA:
+			case SDS_WIN03_GINA:
+				style = LOS_WINXP_GINA;
+				break;
+			default:
+				style = LOS_WIN2K;
+		}
+	}
 
-    if (IsXP(g_ssStyle))
-    {
-        pDimmedWindow = new CDimmedWindow(hInstance);
-        if (pDimmedWindow != NULL)
-        {
-            g_hDesktopWnd = pDimmedWindow->Create();
-        }
-        else
-        {
-            ERRORANDQUIT(L"Failed to create dim window!");
-        }
-    }
-    else
-    {
-        WNDCLASS wcDitherCls;
-        wcDitherCls.style = 0;
-        wcDitherCls.lpfnWndProc = DitherWndProc;
-        wcDitherCls.cbClsExtra = 0;
-        wcDitherCls.cbWndExtra = 0;
-        wcDitherCls.hInstance = hInstance;
-        wcDitherCls.hIcon = NULL;
-        wcDitherCls.hCursor = LoadCursorW(NULL, IDC_ARROW);
-        wcDitherCls.hbrBackground = (HBRUSH)(COLOR_3DFACE + 1);
-        wcDitherCls.lpszMenuName = NULL;
-        wcDitherCls.lpszClassName = DITHER_CLSNAME;
-        RegisterClassW(&wcDitherCls);
+	g_dwStyle = style;
+	RETURN_IF_FAILED(LoadShellModule());
+	g_fRemoteSession = IsRemoteSession();
 
-        g_hDesktopWnd = CreateWindowExW(
-            /* To not show in taskbar: */
-            WS_EX_TOOLWINDOW,              /* dwExStyle */
-            DITHER_CLSNAME,                /* lpClassName */
-            L"",                           /* lpWindowName */
-            WS_POPUP,                      /* dwStyle */
-            x,                             /* X */
-            y,                             /* Y */
-            cx,                            /* nWidth */
-            cy,                            /* nHeight */
-            NULL,                          /* hWndParent */
-            NULL,                          /* hMenu */
-            hInstance,                     /* hInstance */
-            NULL                           /* lpParam */
-        );
+	// Log off dialog always uses the classic style on remote sessions
+	if (g_fRemoteSession && style == LOS_WINXP)
+	{
+		style = LOS_WINXP_GINA;
+		g_dwStyle = LOS_WINXP_GINA;
+	}
 
-        ScreenshotDesktop();
+	CBaseBGWindow *pBGWnd = CreateBGWindow(hwndParent, true);
+	if (pBGWnd)
+	{
+		pBGWnd->CreateAndShow();
+		hwndParent = pBGWnd->GetHWND();
+	}
 
-        ShowWindow(g_hDesktopWnd, SW_SHOW);
-        SetForegroundWindow(g_hDesktopWnd);
+	CBaseDialog *pDialog = nullptr;
+	switch (style)
+	{
+		case LOS_WIN2K:
+		case LOS_WINXP_GINA:
+			pDialog = new CLogoffDialog;
+			break;
+		case LOS_WINXP:
+			pDialog = new CFriendlyDialog(true);
+			break;
+	}
+	if (!pDialog)
+		return E_OUTOFMEMORY;
 
-        HDC hDC = GetDC(g_hDesktopWnd);
-        HDC hMemDC = CreateCompatibleDC(hDC);
+	INT_PTR nResult = pDialog->Show(hwndParent);
+	RETURN_IF_FAILED(DoShutdown((SHUTDOWNTYPE)nResult));
 
-        HBITMAP hbOld = (HBITMAP)SelectObject(hMemDC, g_hbDesktop);
+	if (pBGWnd)
+		delete pBGWnd;
+	delete pDialog;
+	return S_OK;
+}
 
-        BitBlt(
-            hDC,
-            0, 0,
-            cx, cy,
-            hMemDC,
-            0, 0,
-            SRCCOPY
-        );
+CLASSICSHUTDOWN_API DisplayDisconnectDialog(HWND hwndParent)
+{
+	g_fRemoteSession = IsRemoteSession();
+	RETURN_IF_FAILED(LoadShellModule());
 
-        HBRUSH hbr = CreateDitheredBrush();
-        HBRUSH hbrOld = (HBRUSH)SelectObject(hDC, hbr);
+	CDimmedWindow *pBGWnd = nullptr;
+	if (!hwndParent && !DebuggerAttached() && !g_fRemoteSession)
+	{
+		pBGWnd = new CDimmedWindow;
+		pBGWnd->CreateAndShow();
+		hwndParent = pBGWnd->GetHWND();
+	}
 
-        PatBlt(
-            hDC,
-            0, 0,
-            cx, cy,
-            ROP_DPna
-        );
+	CDisconnectDialog *pDialog = new CDisconnectDialog;
+	if (!pDialog)
+		return E_OUTOFMEMORY;
 
-        SelectObject(hDC, hbrOld);
-        DeleteObject(hbr);
+	INT_PTR nResult = pDialog->Show(hwndParent);
+	RETURN_IF_FAILED(DoShutdown((SHUTDOWNTYPE)nResult));
 
-        SelectObject(hMemDC, hbOld);
-        DeleteDC(hMemDC);
-        ReleaseDC(g_hDesktopWnd, hDC);
-    }
-
-    UINT    uDlgId;
-    DLGPROC pDlgProc;
-
-    if (g_ssStyle == SS_XPFRIENDLY)
-    {
-        uDlgId = g_bLogoff ? IDD_LOGOFFWINDOWS_FRIENDLY : IDD_EXITWINDOWS_FRIENDLY;
-        pDlgProc = FriendlyDlgProc;
-    }
-    else
-    {
-        uDlgId = g_bLogoff ? IDD_LOGOFFWINDOWS : IDD_EXITWINDOWS;
-        pDlgProc = g_bLogoff ? LogoffDlgProc : ExitWindowsDlgProc;
-    }
-
-
-    DialogBoxParamW(
-        g_hAppInstance,
-        MAKEINTRESOURCEW(uDlgId),
-        g_hDesktopWnd,
-        pDlgProc,
-        NULL
-    );
-
-    if (pDimmedWindow != NULL)
-    {
-        pDimmedWindow->Release();
-    }
-
-    if (g_hAppInstance)
-    {
-        FreeLibrary(g_hAppInstance);
-    }
-
-    return 0;
+	if (pBGWnd)
+		delete pBGWnd;
+	delete pDialog;
+	return S_OK;
 }

@@ -1,0 +1,10 @@
+#include <windows.h>
+#include <winres.h>
+
+#include <ntverp.h>
+#include "Version.h"
+#define VER_FILETYPE                    VFT_APP
+#define VER_FILEDESCRIPTION_STR         "ClassicShutdown Configuration"
+#define VER_INTERNALNAME_STR            "Config"
+#define VER_ORIGINALFILENAME_STR        "ClassicShutdownConfig.exe"
+#include <common.ver>

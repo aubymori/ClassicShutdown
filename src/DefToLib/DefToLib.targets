@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <_DefToLib Include="$(ProjectDir)defs\*.def" />
+  </ItemGroup>
+  <Target Name="_GenerateDefLib" BeforeTargets="Link" Inputs="@(_DefToLib)" Outputs="@(_DefToLib->'$(IntDir)%(Filename).lib')">
+    <Exec Command="powershell.exe -File &quot;DefToLib.ps1&quot; -Def &quot;%(_DefToLib.Identity)&quot; -Machine $(PlatformShortName) -OutDir &quot;$(IntDir)&quot;" />
+  </Target>
+  <PropertyGroup>
+    <_GeneratedLibs>@(_DefToLib->'%(Filename).lib')</_GeneratedLibs>
+  </PropertyGroup>
+  <ItemDefinitionGroup>
+    <Link>
+      <AdditionalLibraryDirectories>$(IntDir);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>$(_GeneratedLibs);%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
+</Project>

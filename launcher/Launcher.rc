@@ -1,0 +1,12 @@
+#include <windows.h>
+#include <winres.h>
+
+100  ICON  "..\\shared\\res\\ClassicShutdown.ico"
+
+#include <ntverp.h>
+#include "Version.h"
+#define VER_FILETYPE                    VFT_APP
+#define VER_FILEDESCRIPTION_STR         "ClassicShutdown Launcher"
+#define VER_INTERNALNAME_STR            "Launcher"
+#define VER_ORIGINALFILENAME_STR        "ClassicShutdown.exe"
+#include <common.ver>

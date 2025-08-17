@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
@@ -21,32 +21,19 @@
   <PropertyGroup Label="Globals">
     <VCProjectVersion>17.0</VCProjectVersion>
     <Keyword>Win32Proj</Keyword>
-    <ProjectGuid>{26192ddd-a007-45b1-9861-a6c8b1246d34}</ProjectGuid>
+    <ProjectGuid>{d4c5c874-8c72-4c9d-9c53-cea0d59be2c0}</ProjectGuid>
     <RootNamespace>ClassicShutdown</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
-    <ConfigurationType>Application</ConfigurationType>
+  <PropertyGroup Condition="'$(Configuration)'=='Debug'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v143</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
-    <ConfigurationType>Application</ConfigurationType>
-    <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v143</PlatformToolset>
-    <WholeProgramOptimization>true</WholeProgramOptimization>
-    <CharacterSet>Unicode</CharacterSet>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
-    <ConfigurationType>Application</ConfigurationType>
-    <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v143</PlatformToolset>
-    <CharacterSet>Unicode</CharacterSet>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
-    <ConfigurationType>Application</ConfigurationType>
+  <PropertyGroup Condition="'$(Configuration)'=='Release'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>v143</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
@@ -57,62 +44,29 @@
   </ImportGroup>
   <ImportGroup Label="Shared">
   </ImportGroup>
-  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
-  </ImportGroup>
-  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
-  </ImportGroup>
-  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
-  </ImportGroup>
-  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+  <ImportGroup Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <OutDir>$(SolutionDir)build\$(Configuration)-$(Platform)\</OutDir>
-    <IntDir>$(SolutionDir)build\$(Configuration)-$(Platform)\</IntDir>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <OutDir>$(SolutionDir)build\$(Configuration)-$(Platform)\</OutDir>
-    <IntDir>$(SolutionDir)build\$(Configuration)-$(Platform)\</IntDir>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <OutDir>$(SolutionDir)build\$(Configuration)-$(Platform)\</OutDir>
-    <IntDir>$(SolutionDir)build\$(Configuration)-$(Platform)\</IntDir>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <OutDir>$(SolutionDir)build\$(Configuration)-$(Platform)\</OutDir>
-    <IntDir>$(SolutionDir)build\$(Configuration)-$(Platform)\</IntDir>
-  </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
+      <AdditionalIncludeDirectories>..\include;..\shared;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <BasicRuntimeChecks>Default</BasicRuntimeChecks>
+      <BufferSecurityCheck>false</BufferSecurityCheck>
+      <RuntimeTypeInfo>false</RuntimeTypeInfo>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EntryPointSymbol>DllMain</EntryPointSymbol>
+      <IgnoreAllDefaultLibraries>true</IgnoreAllDefaultLibraries>
+      <AdditionalDependencies>shlwapi.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalManifestDependencies>"type='win32' name='Microsoft.Windows.Common-Controls' version='6.0.0.0' processorArchitecture='*' publicKeyToken='6595b64144ccf1df' language='*'";%(AdditionalManifestDependencies)</AdditionalManifestDependencies>
-      <AdditionalDependencies>gdi32.lib;msimg32.lib;powrprof.lib;wtsapi32.lib;comctl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <MinimumRequiredVersion>5.0</MinimumRequiredVersion>
     </Link>
-    <ResourceCompile>
-      <AdditionalOptions>/g 0x0409 /q "muiconfig.xml" /fm "$(IntermediateOutputPath)%(Filename).en-US.res" %(AdditionalOptions)</AdditionalOptions>
-    </ResourceCompile>
-    <PostBuildEvent>
-      <Command>if not exist "$(OutDir)en-US" md "$(OutDir)en-US"
-link /dll /noentry /out:"$(OutDir)en-US\$(TargetFileName).mui" $(IntermediateOutputPath)ClassicShutdown.en-US.res
-
-rc /D "_UNICODE" /D "UNICODE" /l 0x0411 /q "$(ProjectDir)muiconfig.xml" /g 0x0409 /nologo /fo"$(IntermediateOutputPath)temp.res" /fm"$(IntermediateOutputPath)ClassicShutdown.ja-JP.res" "$(ProjectDir)ClassicShutdown.ja-JP.rc"
-if not exist "$(OutDir)ja-JP" md "$(OutDir)ja-JP"
-link /dll /noentry /out:"$(OutDir)ja-JP\$(TargetFileName).mui" "$(IntermediateOutputPath)ClassicShutdown.ja-JP.res"
-muirct -c "$(TargetPath)" -e "$(OutDir)ja-JP\$(TargetFileName).mui"
-del "$(IntermediateOutputPath)temp.res"</Command>
-    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
@@ -122,29 +76,18 @@ del "$(IntermediateOutputPath)temp.res"</Command>
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
+      <AdditionalIncludeDirectories>..\include;..\shared;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <BufferSecurityCheck>false</BufferSecurityCheck>
+      <RuntimeTypeInfo>false</RuntimeTypeInfo>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
-      <EnableCOMDATFolding>true</EnableCOMDATFolding>
-      <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EntryPointSymbol>DllMain</EntryPointSymbol>
+      <IgnoreAllDefaultLibraries>true</IgnoreAllDefaultLibraries>
+      <AdditionalDependencies>shlwapi.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalManifestDependencies>"type='win32' name='Microsoft.Windows.Common-Controls' version='6.0.0.0' processorArchitecture='*' publicKeyToken='6595b64144ccf1df' language='*'";%(AdditionalManifestDependencies)</AdditionalManifestDependencies>
-      <AdditionalDependencies>gdi32.lib;msimg32.lib;powrprof.lib;wtsapi32.lib;comctl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <MinimumRequiredVersion>5.0</MinimumRequiredVersion>
     </Link>
-    <ResourceCompile>
-      <AdditionalOptions>/g 0x0409 /q "muiconfig.xml" /fm "$(IntermediateOutputPath)%(Filename).en-US.res" %(AdditionalOptions)</AdditionalOptions>
-    </ResourceCompile>
-    <PostBuildEvent>
-      <Command>if not exist "$(OutDir)en-US" md "$(OutDir)en-US"
-link /dll /noentry /out:"$(OutDir)en-US\$(TargetFileName).mui" $(IntermediateOutputPath)ClassicShutdown.en-US.res
-
-rc /D "_UNICODE" /D "UNICODE" /l 0x0411 /q "$(ProjectDir)muiconfig.xml" /g 0x0409 /nologo /fo"$(IntermediateOutputPath)temp.res" /fm"$(IntermediateOutputPath)ClassicShutdown.ja-JP.res" "$(ProjectDir)ClassicShutdown.ja-JP.rc"
-if not exist "$(OutDir)ja-JP" md "$(OutDir)ja-JP"
-link /dll /noentry /out:"$(OutDir)ja-JP\$(TargetFileName).mui" "$(IntermediateOutputPath)ClassicShutdown.ja-JP.res"
-muirct -c "$(TargetPath)" -e "$(OutDir)ja-JP\$(TargetFileName).mui"
-del "$(IntermediateOutputPath)temp.res"</Command>
-    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
@@ -152,27 +95,19 @@ del "$(IntermediateOutputPath)temp.res"</Command>
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
+      <AdditionalIncludeDirectories>..\include;..\shared;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <BasicRuntimeChecks>Default</BasicRuntimeChecks>
+      <BufferSecurityCheck>false</BufferSecurityCheck>
+      <RuntimeTypeInfo>false</RuntimeTypeInfo>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EntryPointSymbol>DllMain</EntryPointSymbol>
+      <IgnoreAllDefaultLibraries>true</IgnoreAllDefaultLibraries>
+      <AdditionalDependencies>shlwapi.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalManifestDependencies>"type='win32' name='Microsoft.Windows.Common-Controls' version='6.0.0.0' processorArchitecture='*' publicKeyToken='6595b64144ccf1df' language='*'";%(AdditionalManifestDependencies)</AdditionalManifestDependencies>
-      <AdditionalDependencies>gdi32.lib;msimg32.lib;powrprof.lib;wtsapi32.lib;comctl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <MinimumRequiredVersion>5.0</MinimumRequiredVersion>
     </Link>
-    <ResourceCompile>
-      <AdditionalOptions>/g 0x0409 /q "muiconfig.xml" /fm "$(IntermediateOutputPath)%(Filename).en-US.res" %(AdditionalOptions)</AdditionalOptions>
-    </ResourceCompile>
-    <PostBuildEvent>
-      <Command>if not exist "$(OutDir)en-US" md "$(OutDir)en-US"
-link /dll /noentry /out:"$(OutDir)en-US\$(TargetFileName).mui" $(IntermediateOutputPath)ClassicShutdown.en-US.res
-
-rc /D "_UNICODE" /D "UNICODE" /l 0x0411 /q "$(ProjectDir)muiconfig.xml" /g 0x0409 /nologo /fo"$(IntermediateOutputPath)temp.res" /fm"$(IntermediateOutputPath)ClassicShutdown.ja-JP.res" "$(ProjectDir)ClassicShutdown.ja-JP.rc"
-if not exist "$(OutDir)ja-JP" md "$(OutDir)ja-JP"
-link /dll /noentry /out:"$(OutDir)ja-JP\$(TargetFileName).mui" "$(IntermediateOutputPath)ClassicShutdown.ja-JP.res"
-muirct -c "$(TargetPath)" -e "$(OutDir)ja-JP\$(TargetFileName).mui"
-del "$(IntermediateOutputPath)temp.res"</Command>
-    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
@@ -182,50 +117,178 @@ del "$(IntermediateOutputPath)temp.res"</Command>
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
+      <AdditionalIncludeDirectories>..\include;..\shared;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <BufferSecurityCheck>false</BufferSecurityCheck>
+      <RuntimeTypeInfo>false</RuntimeTypeInfo>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
-      <EnableCOMDATFolding>true</EnableCOMDATFolding>
-      <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EntryPointSymbol>DllMain</EntryPointSymbol>
+      <IgnoreAllDefaultLibraries>true</IgnoreAllDefaultLibraries>
+      <AdditionalDependencies>shlwapi.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalManifestDependencies>"type='win32' name='Microsoft.Windows.Common-Controls' version='6.0.0.0' processorArchitecture='*' publicKeyToken='6595b64144ccf1df' language='*'";%(AdditionalManifestDependencies)</AdditionalManifestDependencies>
-      <AdditionalDependencies>gdi32.lib;msimg32.lib;powrprof.lib;wtsapi32.lib;comctl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <MinimumRequiredVersion>5.0</MinimumRequiredVersion>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup>
+    <Link>
+      <AdditionalDependencies>msimg32.lib;powrprof.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <ModuleDefinitionFile Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">ClassicShutdown.def</ModuleDefinitionFile>
+      <ModuleDefinitionFile Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">ClassicShutdown.def</ModuleDefinitionFile>
+      <ModuleDefinitionFile Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">ClassicShutdown.def</ModuleDefinitionFile>
+      <ModuleDefinitionFile Condition="'$(Configuration)|$(Platform)'=='Release|x64'">ClassicShutdown.def</ModuleDefinitionFile>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClInclude Include="..\include\ClassicShutdown.h" />
+    <ClInclude Include="..\shared\Util.h" />
+    <ClInclude Include="..\shared\Version.h" />
+    <ClInclude Include="2KShutdownDialog.h" />
+    <ClInclude Include="9xShutdownDialog.h" />
+    <ClInclude Include="BaseBGWindow.h" />
+    <ClInclude Include="BaseDialog.h" />
+    <ClInclude Include="ClassicShutdownP.h" />
+    <ClInclude Include="DimmedWindow.h" />
+    <ClInclude Include="DisconnectDialog.h" />
+    <ClInclude Include="DitheredWindow.h" />
+    <ClInclude Include="FriendlyDialog.h" />
+    <ClInclude Include="LogoffDialog.h" />
+    <ClInclude Include="..\shared\MinCRT.h" />
+    <ClInclude Include="Resource.h" />
+    <ClInclude Include="Window.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="2KShutdownDialog.cpp" />
+    <ClCompile Include="9xShutdownDialog.cpp" />
+    <ClCompile Include="BaseBGWindow.cpp" />
+    <ClCompile Include="BaseDialog.cpp" />
+    <ClCompile Include="ClassicShutdown.cpp" />
+    <ClCompile Include="DimmedWindow.cpp" />
+    <ClCompile Include="DisconnectDialog.cpp" />
+    <ClCompile Include="DitheredWindow.cpp" />
+    <ClCompile Include="FriendlyDialog.cpp" />
+    <ClCompile Include="LogoffDialog.cpp" />
+    <ClCompile Include="Settings.cpp" />
+    <ClCompile Include="Shutdown.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="ClassicShutdown.en-US.rc">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+    </ResourceCompile>
+    <ResourceCompile Include="ClassicShutdown.ja-JP.rc">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </ResourceCompile>
+    <ResourceCompile Include="ClassicShutdown.rc" />
+    <ResourceCompile Include="Version.rc">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </ResourceCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <_DefToLib Include="$(ProjectDir)defs\*.def" />
+  </ItemGroup>
+  <Target Name="_GenerateDefLib" BeforeTargets="Link" Inputs="@(_DefToLib)" Outputs="@(_DefToLib->'$(IntDir)%(Filename).lib')">
+    <Exec Command="powershell.exe -File &quot;$(SolutionDir)scripts\DefToLib.ps1&quot; -Def &quot;%(_DefToLib.Identity)&quot; -Machine $(PlatformShortName) -OutDir &quot;$(IntDir)&quot;" />
+  </Target>
+  <PropertyGroup>
+    <_GeneratedLibs>@(_DefToLib->'%(Filename).lib')</_GeneratedLibs>
+  </PropertyGroup>
+  <ItemDefinitionGroup>
+    <Link>
+      <AdditionalLibraryDirectories>$(IntDir);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>comctl32.lib;wtsapi32.lib;$(_GeneratedLibs);%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <ResourceCompile>
-      <AdditionalOptions>/g 0x0409 /q "muiconfig.xml" /fm "$(IntermediateOutputPath)%(Filename).en-US.res" %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">..\shared;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">/g 0x0409 /q "muiconfig.xml" /fm "$(IntermediateOutputPath)%(Filename).en-US.res" %(AdditionalOptions)</AdditionalOptions>
+    </ResourceCompile>
+    <ResourceCompile>
+      <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">..\shared;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">/g 0x0409 /q "muiconfig.xml" /fm "$(IntermediateOutputPath)%(Filename).en-US.res" %(AdditionalOptions)</AdditionalOptions>
+    </ResourceCompile>
+    <ResourceCompile>
+      <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">..\shared;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">/g 0x0409 /q "muiconfig.xml" /fm "$(IntermediateOutputPath)%(Filename).en-US.res" %(AdditionalOptions)</AdditionalOptions>
+    </ResourceCompile>
+    <ResourceCompile>
+      <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Release|x64'">..\shared;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release|x64'">/g 0x0409 /q "muiconfig.xml" /fm "$(IntermediateOutputPath)%(Filename).en-US.res" %(AdditionalOptions)</AdditionalOptions>
     </ResourceCompile>
     <PostBuildEvent>
-      <Command>if not exist "$(OutDir)en-US" md "$(OutDir)en-US"
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">if not exist "$(OutDir)en-US" md "$(OutDir)en-US"
 link /dll /noentry /out:"$(OutDir)en-US\$(TargetFileName).mui" $(IntermediateOutputPath)ClassicShutdown.en-US.res
 
-rc /D "_UNICODE" /D "UNICODE" /l 0x0411 /q "$(ProjectDir)muiconfig.xml" /g 0x0409 /nologo /fo"$(IntermediateOutputPath)temp.res" /fm"$(IntermediateOutputPath)ClassicShutdown.ja-JP.res" "$(ProjectDir)ClassicShutdown.ja-JP.rc"
+rc /D "_UNICODE" /D "UNICODE" /I"$(SolutionDir)shared" /l 0x0411 /q "muiconfig.xml" /g 0x0409 /nologo /fo"$(IntermediateOutputPath)temp.res" /fm"$(IntermediateOutputPath)ClassicShutdown.ja-JP.res" ClassicShutdown.ja-JP.rc
 if not exist "$(OutDir)ja-JP" md "$(OutDir)ja-JP"
 link /dll /noentry /out:"$(OutDir)ja-JP\$(TargetFileName).mui" "$(IntermediateOutputPath)ClassicShutdown.ja-JP.res"
 muirct -c "$(TargetPath)" -e "$(OutDir)ja-JP\$(TargetFileName).mui"
+
 del "$(IntermediateOutputPath)temp.res"</Command>
     </PostBuildEvent>
+    <PostBuildEvent>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">if not exist "$(OutDir)en-US" md "$(OutDir)en-US"
+link /dll /noentry /out:"$(OutDir)en-US\$(TargetFileName).mui" $(IntermediateOutputPath)ClassicShutdown.en-US.res
+
+rc /D "_UNICODE" /D "UNICODE" /I"$(SolutionDir)shared" /l 0x0411 /q "muiconfig.xml" /g 0x0409 /nologo /fo"$(IntermediateOutputPath)temp.res" /fm"$(IntermediateOutputPath)ClassicShutdown.ja-JP.res" ClassicShutdown.ja-JP.rc
+if not exist "$(OutDir)ja-JP" md "$(OutDir)ja-JP"
+link /dll /noentry /out:"$(OutDir)ja-JP\$(TargetFileName).mui" "$(IntermediateOutputPath)ClassicShutdown.ja-JP.res"
+muirct -c "$(TargetPath)" -e "$(OutDir)ja-JP\$(TargetFileName).mui"
+
+del "$(IntermediateOutputPath)temp.res"</Command>
+    </PostBuildEvent>
+    <PostBuildEvent>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">if not exist "$(OutDir)en-US" md "$(OutDir)en-US"
+link /dll /noentry /out:"$(OutDir)en-US\$(TargetFileName).mui" $(IntermediateOutputPath)ClassicShutdown.en-US.res
+
+rc /D "_UNICODE" /D "UNICODE" /I"$(SolutionDir)shared" /l 0x0411 /q "muiconfig.xml" /g 0x0409 /nologo /fo"$(IntermediateOutputPath)temp.res" /fm"$(IntermediateOutputPath)ClassicShutdown.ja-JP.res" ClassicShutdown.ja-JP.rc
+if not exist "$(OutDir)ja-JP" md "$(OutDir)ja-JP"
+link /dll /noentry /out:"$(OutDir)ja-JP\$(TargetFileName).mui" "$(IntermediateOutputPath)ClassicShutdown.ja-JP.res"
+muirct -c "$(TargetPath)" -e "$(OutDir)ja-JP\$(TargetFileName).mui"
+
+del "$(IntermediateOutputPath)temp.res"</Command>
+    </PostBuildEvent>
+    <PostBuildEvent>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">if not exist "$(OutDir)en-US" md "$(OutDir)en-US"
+link /dll /noentry /out:"$(OutDir)en-US\$(TargetFileName).mui" $(IntermediateOutputPath)ClassicShutdown.en-US.res
+
+rc /D "_UNICODE" /D "UNICODE" /I"$(SolutionDir)shared" /l 0x0411 /q "muiconfig.xml" /g 0x0409 /nologo /fo"$(IntermediateOutputPath)temp.res" /fm"$(IntermediateOutputPath)ClassicShutdown.ja-JP.res" ClassicShutdown.ja-JP.rc
+if not exist "$(OutDir)ja-JP" md "$(OutDir)ja-JP"
+link /dll /noentry /out:"$(OutDir)ja-JP\$(TargetFileName).mui" "$(IntermediateOutputPath)ClassicShutdown.ja-JP.res"
+muirct -c "$(TargetPath)" -e "$(OutDir)ja-JP\$(TargetFileName).mui"
+
+del "$(IntermediateOutputPath)temp.res"</Command>
+    </PostBuildEvent>
+    <ClCompile>
+      <ExceptionHandling Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExceptionHandling>
+      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">/Gs8192 %(AdditionalOptions)</AdditionalOptions>
+    </ClCompile>
+    <ClCompile>
+      <ExceptionHandling Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</ExceptionHandling>
+      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">/Gs8192 %(AdditionalOptions)</AdditionalOptions>
+    </ClCompile>
+    <ClCompile>
+      <ExceptionHandling Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExceptionHandling>
+      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">/Gs8192 %(AdditionalOptions)</AdditionalOptions>
+    </ClCompile>
+    <ClCompile>
+      <ExceptionHandling Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExceptionHandling>
+      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release|x64'">/Gs8192 %(AdditionalOptions)</AdditionalOptions>
+    </ClCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="DimmedWindow.cpp" />
-    <ClCompile Include="ClassicShutdown.cpp" />
-    <ClCompile Include="ExitWindowsDlg.cpp" />
-    <ClCompile Include="FriendlyDlg.cpp" />
-    <ClCompile Include="FriendlyDlg.h" />
-    <ClCompile Include="LogoffDlg.cpp" />
+    <None Include="ClassicShutdown.def" />
+    <None Include="defs\winbrand.def" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="ClassicShutdown.h" />
-    <ClInclude Include="DimmedWindow.h" />
-    <ClInclude Include="ExitWindowsDlg.h" />
-    <ClInclude Include="LogoffDlg.h" />
-    <ClInclude Include="resource.h" />
-  </ItemGroup>
-  <ItemGroup>
-    <ResourceCompile Include="ClassicShutdown.rc" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="muiconfig.xml" />
+    <Xml Include="muiconfig.xml" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

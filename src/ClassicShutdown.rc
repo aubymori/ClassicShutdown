@@ -1,22 +1,10 @@
 #include <windows.h>
-#include "resource.h"
+#include <winres.h>
+#include "Resource.h"
 
+IDB_BACKGROUND    BITMAP  "res\\background.bmp"
+IDB_FLAG          BITMAP  "res\\flag.bmp"
+IDB_TO_BUTTONS    BITMAP  "res\\to_buttons.bmp"
+IDB_SU_BUTTONS    BITMAP  "res\\su_buttons.bmp"
 
-IDI_CLASSICSHUTDOWN             ICON                    "res\\ClassicShutdown.ico"
-
-IDB_BACKGROUND                  BITMAP  DISCARDABLE     "res\\to_background.bmp"
-IDB_FLAG                        BITMAP  DISCARDABLE     "res\\to_flag.bmp"
-
-IDB_BUTTONS                     BITMAP  DISCARDABLE     "res\\to_buttons.bmp"
-IDB_LOGOFF_BUTTONS              BITMAP  DISCARDABLE     "res\\su_buttons.bmp"
-
-/**
-  * !!! DON'T INCLUDE OTHER LOCALES HERE !!!
-  * For whatever reason, if you compile an RC file with resources
-  * for more than one language, the RC compiler refuses to output
-  * an MUI file and instead outputs everything in one language
-  * neutral file. The en-US locale is built along with the main
-  * project just to get an MUI checksum to copy to all the other
-  * MUI files.
-  */
 #include "ClassicShutdown.en-US.rc"

@@ -1,0 +1,8 @@
+LIBARY ClassicShutdown
+EXPORTS
+	DisplayShutdownDialog @1
+	DisplayLogoffDialog   @2
+	ReadSettingDWORD      @3
+	WriteSettingDWORD     @4
+	ReadSettingString     @5
+	WriteSettingString    @6

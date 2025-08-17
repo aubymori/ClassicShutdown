@@ -1,6 +1,7 @@
 #pragma once
 #define CLASSICSHUTDOWN_IMPLEMENTATION
 #include <ClassicShutdown.h>
+#include <winnt.h>
 #include <shlwapi.h>
 #include <windowsx.h>
 #include <commctrl.h>
@@ -65,3 +66,5 @@ HRESULT DoShutdown(SHUTDOWNTYPE type);
 
 /* Undocumented function from winbrand.dll */
 EXTERN_C WINUSERAPI HANDLE WINAPI BrandingLoadImage(LPCWSTR pszBrand, UINT uID, UINT type, int cx, int cy, UINT fuLoad);
+
+EXTERN_C NTSYSAPI NTSTATUS NTAPI RtlGetVersion(PRTL_OSVERSIONINFOW lpVersionInformation);

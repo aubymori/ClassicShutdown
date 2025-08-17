@@ -50,19 +50,39 @@ HRESULT C2KShutdownDialog::_InitBannerFromRegistry()
 
 	RETURN_IF_FAILED(ReadSettingDWORD(CSDS_BANNERCOLOR, &_crBanner));
 
+	RTL_OSVERSIONINFOW osvi;
+	osvi.dwOSVersionInfoSize = sizeof(osvi);
+	RtlGetVersion(&osvi);
+
 	if (*szBrandPath)
 		_hbmBrand = (HBITMAP)LoadImageW(NULL, szBrandPath, IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
 
-	// We set _fUsingWinbrand here so we can TransparentBlt the image with white as the transparent
-	// color like Windows does.
+	
 	if (!_hbmBrand)
 	{
-		_hbmBrand = (HBITMAP)BrandingLoadImage(L"Basebrd", 121, IMAGE_BITMAP, 0, 0, LR_DEFAULTCOLOR);
-		_fUsingWinbrand = true;
+		// Windows 7+ behavior
+		if (osvi.dwMajorVersion > 6 || osvi.dwMinorVersion > 0)
+		{
+			// We set _fUsingWinbrand here so we can TransparentBlt the image with white as the transparent
+			// color like Windows 7+ does.
+			_hbmBrand = (HBITMAP)BrandingLoadImage(L"Basebrd", 121, IMAGE_BITMAP, 0, 0, LR_DEFAULTCOLOR);
+			_fUsingWinbrand = true;
+		}
+		// Windows Vista behavior
+		else
+		{
+			_hbmBrand = (HBITMAP)BrandingLoadImage(L"Basebrd", 101, IMAGE_BITMAP, 0, 0, LR_DEFAULTCOLOR);
+		}
 	}
 
 	if (*szBarPath)
 		_hbmBar = (HBITMAP)LoadImageW(NULL, szBarPath, IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
+
+	// Vista bar
+	if (!_hbmBar && osvi.dwMajorVersion == 6 && osvi.dwMinorVersion == 0)
+	{
+		_hbmBar = (HBITMAP)BrandingLoadImage(L"Basebrd", 111, IMAGE_BITMAP, 0, 0, LR_DEFAULTCOLOR);
+	}
 
 	return S_OK;
 }

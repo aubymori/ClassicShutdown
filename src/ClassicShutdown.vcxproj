@@ -162,10 +162,11 @@
     <ClCompile Include="9xShutdownDialog.cpp" />
     <ClCompile Include="BaseBGWindow.cpp" />
     <ClCompile Include="BaseDialog.cpp" />
-    <ClCompile Include="ClassicShutdown.cpp" />
+    <ClCompile Include="Dialogs.cpp" />
     <ClCompile Include="DimmedWindow.cpp" />
     <ClCompile Include="DisconnectDialog.cpp" />
     <ClCompile Include="DitheredWindow.cpp" />
+    <ClCompile Include="DLL.cpp" />
     <ClCompile Include="FriendlyDialog.cpp" />
     <ClCompile Include="LogoffDialog.cpp" />
     <ClCompile Include="Settings.cpp" />

@@ -14,43 +14,6 @@ bool      g_fStandByAvailable;
 bool      g_fHibernationAvailable;
 bool      g_fRemoteSession;
 
-void *operator new(size_t size)
-{
-	return HeapAlloc(GetProcessHeap(), 0, size);
-}
-
-void operator delete(void *ptr)
-{
-	HeapFree(GetProcessHeap(), 0, ptr);
-}
-
-void operator delete(void *ptr, size_t size)
-{
-	HeapFree(GetProcessHeap(), 0, ptr);
-}
-
-EXTERN_C STDAPI_(BOOL) DllMain(
-	HINSTANCE hinstDLL,
-	DWORD     fdwReason,
-	LPVOID    lpvReserved)
-{
-	switch (fdwReason)
-	{
-		case DLL_PROCESS_ATTACH:
-		{
-			g_hinst = hinstDLL;
-			break;
-		}
-		case DLL_PROCESS_DETACH:
-			if (g_hkey)
-				RegCloseKey(g_hkey);
-			if (g_hinstShell)
-				FreeLibrary(g_hinstShell);
-			break;
-	}
-	return TRUE;
-}
-
 void UpdatePowerCapabilities()
 {
 	SYSTEM_POWER_CAPABILITIES spc;
@@ -117,16 +80,15 @@ CBaseBGWindow *CreateBGWindow(HWND hwndParent, bool fLogoff)
 	}
 }
 
-HRESULT LoadShellModule(void)
-{
-	g_hinstShell = LoadLibraryExW(L"shell32.dll", NULL, LOAD_LIBRARY_SEARCH_SYSTEM32 | LOAD_LIBRARY_AS_DATAFILE);
-	if (!g_hinstShell)
-		return HRESULT_FROM_WIN32(GetLastError());
-	return S_OK;
-}
-
 CLASSICSHUTDOWN_API DisplayShutdownDialog(HWND hwndParent, SHUTDOWNSTYLE style, SHUTDOWNTYPE type, PSHUTDOWNOPTIONS pOptions)
 {
+	CBaseBGWindow         *pBGWnd   = nullptr;
+	CBaseDialog           *pDialog  = nullptr;
+	ULONG_PTR              ulCookie = 0;
+	DPI_AWARENESS_CONTEXT  dpiOld   = 0;
+	INT_PTR                nResult  = -1;
+	HRESULT                hr       = S_OK;
+
 	if (style < SDS_USER || style >= SDS_COUNT)
 		return E_INVALIDARG;
 
@@ -138,14 +100,16 @@ CLASSICSHUTDOWN_API DisplayShutdownDialog(HWND hwndParent, SHUTDOWNSTYLE style, 
 	UpdatePowerCapabilities();
 	g_fRemoteSession = IsRemoteSession();
 		
-	CBaseBGWindow *pBGWnd = CreateBGWindow(hwndParent, false);
+	dpiOld = ActivateDPIAwarenessAndActCtx(&ulCookie);
+
+	pBGWnd = CreateBGWindow(hwndParent, false);
 	if (pBGWnd)
 	{
 		pBGWnd->CreateAndShow();
 		hwndParent = pBGWnd->GetHWND();
 	}
 
-	CBaseDialog *pDialog = nullptr;
+	pDialog = nullptr;
 	switch (style)
 	{
 		case SDS_WIN95:
@@ -163,11 +127,19 @@ CLASSICSHUTDOWN_API DisplayShutdownDialog(HWND hwndParent, SHUTDOWNSTYLE style, 
 			break;
 	}
 	if (!pDialog)
-		return E_OUTOFMEMORY;
+	{
+		hr = E_OUTOFMEMORY;
+		goto cleanup;
+	}
 
-	INT_PTR nResult = pDialog->Show(hwndParent);
-	RETURN_IF_FAILED(DoShutdown((SHUTDOWNTYPE)nResult));
+	dpiOld = ActivateDPIAwarenessAndActCtx(&ulCookie);
 
+	nResult = pDialog->Show(hwndParent);
+	IFC(DoShutdown((SHUTDOWNTYPE)nResult));
+
+cleanup:
+	if (dpiOld && ulCookie)
+		DeactivateDPIAwarenessAndActCtx(ulCookie, dpiOld);
 	if (pBGWnd)
 		delete pBGWnd;
 	delete pDialog;
@@ -176,6 +148,13 @@ CLASSICSHUTDOWN_API DisplayShutdownDialog(HWND hwndParent, SHUTDOWNSTYLE style, 
 
 CLASSICSHUTDOWN_API DisplayLogoffDialog(HWND hwndParent, LOGOFFSTYLE style)
 {
+	CBaseBGWindow         *pBGWnd   = nullptr;
+	CBaseDialog           *pDialog  = nullptr;
+	INT_PTR                nResult  = -1;
+	ULONG_PTR              ulCookie = 0;
+	DPI_AWARENESS_CONTEXT  dpiOld   = 0;
+	HRESULT                hr       = S_OK;
+
 	if (style < LOS_USER || style >= LOS_COUNT)
 		return E_INVALIDARG;
 
@@ -209,7 +188,7 @@ CLASSICSHUTDOWN_API DisplayLogoffDialog(HWND hwndParent, LOGOFFSTYLE style)
 	}
 
 	g_dwStyle = style;
-	RETURN_IF_FAILED(LoadShellModule());
+	IFC(LoadShellModule());
 	g_fRemoteSession = IsRemoteSession();
 
 	// Log off dialog always uses the classic style on remote sessions
@@ -219,14 +198,16 @@ CLASSICSHUTDOWN_API DisplayLogoffDialog(HWND hwndParent, LOGOFFSTYLE style)
 		g_dwStyle = LOS_WINXP_GINA;
 	}
 
-	CBaseBGWindow *pBGWnd = CreateBGWindow(hwndParent, true);
+	dpiOld = ActivateDPIAwarenessAndActCtx(&ulCookie);
+
+	pBGWnd = CreateBGWindow(hwndParent, true);
 	if (pBGWnd)
 	{
 		pBGWnd->CreateAndShow();
 		hwndParent = pBGWnd->GetHWND();
 	}
 
-	CBaseDialog *pDialog = nullptr;
+	pDialog = nullptr;
 	switch (style)
 	{
 		case LOS_WIN2K:
@@ -238,11 +219,17 @@ CLASSICSHUTDOWN_API DisplayLogoffDialog(HWND hwndParent, LOGOFFSTYLE style)
 			break;
 	}
 	if (!pDialog)
-		return E_OUTOFMEMORY;
+	{
+		hr = E_OUTOFMEMORY;
+		goto cleanup;
+	}
 
-	INT_PTR nResult = pDialog->Show(hwndParent);
-	RETURN_IF_FAILED(DoShutdown((SHUTDOWNTYPE)nResult));
+	nResult = pDialog->Show(hwndParent);
+	IFC(DoShutdown((SHUTDOWNTYPE)nResult));
 
+cleanup:
+	if (dpiOld && ulCookie)
+		DeactivateDPIAwarenessAndActCtx(ulCookie, dpiOld);
 	if (pBGWnd)
 		delete pBGWnd;
 	delete pDialog;
@@ -251,10 +238,18 @@ CLASSICSHUTDOWN_API DisplayLogoffDialog(HWND hwndParent, LOGOFFSTYLE style)
 
 CLASSICSHUTDOWN_API DisplayDisconnectDialog(HWND hwndParent)
 {
+	CDimmedWindow         *pBGWnd   = nullptr;
+	CDisconnectDialog     *pDialog  = nullptr;
+	ULONG_PTR              ulCookie = 0;
+	DPI_AWARENESS_CONTEXT  dpiOld   = 0;
+	INT_PTR                nResult  = -1;
+	HRESULT                hr       = S_OK;
+
 	g_fRemoteSession = IsRemoteSession();
 	RETURN_IF_FAILED(LoadShellModule());
 
-	CDimmedWindow *pBGWnd = nullptr;
+	dpiOld = ActivateDPIAwarenessAndActCtx(&ulCookie);
+
 	if (!hwndParent && !DebuggerAttached() && !g_fRemoteSession)
 	{
 		pBGWnd = new CDimmedWindow;
@@ -262,13 +257,19 @@ CLASSICSHUTDOWN_API DisplayDisconnectDialog(HWND hwndParent)
 		hwndParent = pBGWnd->GetHWND();
 	}
 
-	CDisconnectDialog *pDialog = new CDisconnectDialog;
+	pDialog = new CDisconnectDialog;
 	if (!pDialog)
-		return E_OUTOFMEMORY;
+	{
+		hr = E_OUTOFMEMORY;
+		goto cleanup;
+	}
 
-	INT_PTR nResult = pDialog->Show(hwndParent);
-	RETURN_IF_FAILED(DoShutdown((SHUTDOWNTYPE)nResult));
+	nResult = pDialog->Show(hwndParent);
+	IFC(DoShutdown((SHUTDOWNTYPE)nResult));
 
+cleanup:
+	if (dpiOld && ulCookie)
+		DeactivateDPIAwarenessAndActCtx(ulCookie, dpiOld);
 	if (pBGWnd)
 		delete pBGWnd;
 	delete pDialog;

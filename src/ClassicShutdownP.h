@@ -46,6 +46,9 @@ do                             \
 		return __hr;           \
 } while (0)
 
+#define IFC(expr) \
+	hr = (expr); if (FAILED(hr)) goto cleanup;
+
 extern HINSTANCE g_hinst;
 extern HINSTANCE g_hinstShell;
 extern DWORD     g_dwStyle;
@@ -53,6 +56,10 @@ extern HKEY      g_hkey;
 extern bool      g_fStandByAvailable;
 extern bool      g_fHibernationAvailable;
 extern bool      g_fRemoteSession;
+
+HRESULT LoadShellModule(void);
+DPI_AWARENESS_CONTEXT ActivateDPIAwarenessAndActCtx(ULONG_PTR *pulCookie);
+void DeactivateDPIAwarenessAndActCtx(ULONG_PTR ulCookie, DPI_AWARENESS_CONTEXT dpiOld);
 
 HRESULT DoShutdown(SHUTDOWNTYPE type);
 

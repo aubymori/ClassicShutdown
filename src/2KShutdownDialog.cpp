@@ -57,9 +57,10 @@ HRESULT C2KShutdownDialog::_InitBannerFromRegistry()
 	if (*szBrandPath)
 		_hbmBrand = (HBITMAP)LoadImageW(NULL, szBrandPath, IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
 
-	
+	bool fGotFromWinbrand = false;
 	if (!_hbmBrand)
 	{
+		fGotFromWinbrand = true;
 		// Windows 7+ behavior
 		if (osvi.dwMajorVersion > 6 || osvi.dwMinorVersion > 0)
 		{
@@ -79,7 +80,7 @@ HRESULT C2KShutdownDialog::_InitBannerFromRegistry()
 		_hbmBar = (HBITMAP)LoadImageW(NULL, szBarPath, IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
 
 	// Vista bar
-	if (!_hbmBar && osvi.dwMajorVersion == 6 && osvi.dwMinorVersion == 0)
+	if (fGotFromWinbrand && !_hbmBar && osvi.dwMajorVersion == 6 && osvi.dwMinorVersion == 0)
 	{
 		_hbmBar = (HBITMAP)BrandingLoadImage(L"Basebrd", 111, IMAGE_BITMAP, 0, 0, LR_DEFAULTCOLOR);
 	}

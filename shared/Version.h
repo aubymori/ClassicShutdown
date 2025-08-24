@@ -7,6 +7,6 @@
 #define VER_LEGALCOPYRIGHT_YEARS        "2025"
 #define VER_LEGALCOPYRIGHT_STR          "Copyright \xA9 2025 aubymori"
 #undef  VER_PRODUCTVERSION
-#define VER_PRODUCTVERSION              2,0,1,0
+#define VER_PRODUCTVERSION              2,0,2,0
 #undef  VER_PRODUCTVERSION_STR
-#define VER_PRODUCTVERSION_STR          "2.0.1"
+#define VER_PRODUCTVERSION_STR          "2.0.2"

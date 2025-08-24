@@ -38,8 +38,8 @@ inline size_t StrLenW(LPCWSTR pszString)
 inline UINT GetWindowDPI(HWND hwnd)
 {
 	typedef UINT (WINAPI *GetDpiForWindow_t)(HWND);
-	static GetDpiForWindow_t pfnGetDpiForWindow
-		= (GetDpiForWindow_t)GetProcAddress(GetModuleHandleW(L"user32.dll"), "GetDpiForWindow");
+	static GetDpiForWindow_t pfnGetDpiForWindow;
+	pfnGetDpiForWindow = (GetDpiForWindow_t)GetProcAddress(GetModuleHandleW(L"user32.dll"), "GetDpiForWindow");
 
 	if (pfnGetDpiForWindow)
 	{
@@ -64,8 +64,8 @@ inline BOOL AdjustWindowRectDPI(
 )
 {
 	typedef BOOL (WINAPI *AdjustWindowRectExForDpi_t)(LPRECT, DWORD, BOOL, DWORD, UINT);
-	static AdjustWindowRectExForDpi_t pfnAdjustWindowRectExForDpi
-		= (AdjustWindowRectExForDpi_t)GetProcAddress(GetModuleHandleW(L"user32.dll"), "AdjustWindowRectExForDpi");
+	static AdjustWindowRectExForDpi_t pfnAdjustWindowRectExForDpi;
+	pfnAdjustWindowRectExForDpi = (AdjustWindowRectExForDpi_t)GetProcAddress(GetModuleHandleW(L"user32.dll"), "AdjustWindowRectExForDpi");
 
 	if (pfnAdjustWindowRectExForDpi)
 		return pfnAdjustWindowRectExForDpi(lpRect, dwStyle, fMenu, dwExStyle, dpi);

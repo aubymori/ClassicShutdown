@@ -34,3 +34,41 @@ inline size_t StrLenW(LPCWSTR pszString)
 		len++;
 	return len;
 }
+
+inline UINT GetWindowDPI(HWND hwnd)
+{
+	typedef UINT (WINAPI *GetDpiForWindow_t)(HWND);
+	static GetDpiForWindow_t pfnGetDpiForWindow
+		= (GetDpiForWindow_t)GetProcAddress(GetModuleHandleW(L"user32.dll"), "GetDpiForWindow");
+
+	if (pfnGetDpiForWindow)
+	{
+		return pfnGetDpiForWindow(hwnd);
+	}
+	else
+	{
+		HDC hdc = GetDC(hwnd);
+		UINT dpi = GetDeviceCaps(hdc, LOGPIXELSX);
+		ReleaseDC(hwnd, hdc);
+		return dpi;
+	}
+}
+
+/* Wrapper for AdjustWindowRectEx(ForDpi) */
+inline BOOL AdjustWindowRectDPI(
+	LPRECT lpRect,
+	DWORD  dwStyle,
+	BOOL   fMenu,
+	DWORD  dwExStyle,
+	UINT   dpi
+)
+{
+	typedef BOOL (WINAPI *AdjustWindowRectExForDpi_t)(LPRECT, DWORD, BOOL, DWORD, UINT);
+	static AdjustWindowRectExForDpi_t pfnAdjustWindowRectExForDpi
+		= (AdjustWindowRectExForDpi_t)GetProcAddress(GetModuleHandleW(L"user32.dll"), "AdjustWindowRectExForDpi");
+
+	if (pfnAdjustWindowRectExForDpi)
+		return pfnAdjustWindowRectExForDpi(lpRect, dwStyle, fMenu, dwExStyle, dpi);
+	else
+		return AdjustWindowRectEx(lpRect, dwStyle, fMenu, dwExStyle);
+}

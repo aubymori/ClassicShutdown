@@ -122,30 +122,35 @@ HRESULT C2KShutdownDialog::_InitBanner()
 		int dy = _sizeBrand.cy + _sizeBar.cy;
 		int cx = 0;
 
-		RECT rcClient;
-		GetClientRect(_hwnd, &rcClient);
+		RECT rc;
+		GetClientRect(_hwnd, &rc);
 
 		int cxBanner = max(_sizeBrand.cx, _sizeBar.cx);
-		if (cxBanner > RECTWIDTH(rcClient))
+		if (cxBanner > RECTWIDTH(rc))
 		{
 			cx = cxBanner;
-			dx = (cxBanner - RECTWIDTH(rcClient)) / 2;
+			dx = (cxBanner - RECTWIDTH(rc)) / 2;
 		}
 
 		_MoveChildren(dx, dy);
 
 		if (cx)
 		{
-			RECT rcWindow;
-			GetWindowRect(_hwnd, &rcWindow);
-
-			// Add border width
-			cx += RECTWIDTH(rcWindow) - RECTWIDTH(rcClient);
+			rc.bottom += dy;
+			rc.left  = 0;
+			rc.right = cxBanner;
+			AdjustWindowRectDPI(
+				&rc,
+				GetWindowLongW(_hwnd, GWL_STYLE),
+				FALSE,
+				GetWindowLongW(_hwnd, GWL_EXSTYLE),
+				GetWindowDPI(_hwnd)
+			);
 
 			SetWindowPos(
 				_hwnd, NULL,
 				0, 0,
-				cx, RECTHEIGHT(rcWindow),
+				RECTWIDTH(rc), RECTHEIGHT(rc),
 				SWP_NOMOVE | SWP_NOZORDER
 			);
 		}

@@ -7,4 +7,12 @@ IDB_FLAG          BITMAP  "res\\flag.bmp"
 IDB_TO_BUTTONS    BITMAP  "res\\to_buttons.bmp"
 IDB_SU_BUTTONS    BITMAP  "res\\su_buttons.bmp"
 
+#include <ntverp.h>
+#include "Version.h"
+#define VER_FILETYPE                    VFT_DLL
+#define VER_FILEDESCRIPTION_STR         "ClassicShutdown DLL"
+#define VER_INTERNALNAME_STR            "ClassicShutdown"
+#define VER_ORIGINALFILENAME_STR        "ClassicShutdown.dll"
+#include <common.ver>
+
 #include "ClassicShutdown.en-US.rc"

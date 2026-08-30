@@ -2,8 +2,6 @@
 #include <winres.h>
 #include "Resource.h"
 
-#include "Version.rc"
-
 LANGUAGE LANG_JAPANESE, SUBLANG_JAPANESE_JAPAN
 
 STRINGTABLE DISCARDABLE

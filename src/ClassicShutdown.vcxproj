@@ -223,6 +223,15 @@
     <ClCompile Include="Settings.cpp" />
     <ClCompile Include="Shutdown.cpp" />
   </ItemGroup>
+  <Import Project="$(ProjectDir)MUIBuild\MUIBuild.targets" />
+  <PropertyGroup Label="MUI">
+    <_PrimaryLanguage>en-US</_PrimaryLanguage>
+    <_PrimaryLanguageID>0x0409</_PrimaryLanguageID>
+    <_RCConfig>ClassicShutdown.rcconfig</_RCConfig>
+  </PropertyGroup>
+  <Target Name="MUI" AfterTargets="Link">
+    <_BuildMUI Language="ja-JP" />
+  </Target>
   <ItemGroup>
     <ResourceCompile Include="ClassicShutdown.en-US.rc">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
@@ -258,86 +267,18 @@
     </Link>
     <ResourceCompile>
       <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">..\shared;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">/g 0x0409 /q "muiconfig.xml" /fm "$(IntermediateOutputPath)%(Filename).en-US.res" %(AdditionalOptions)</AdditionalOptions>
     </ResourceCompile>
     <ResourceCompile>
       <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">..\shared;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">/g 0x0409 /q "muiconfig.xml" /fm "$(IntermediateOutputPath)%(Filename).en-US.res" %(AdditionalOptions)</AdditionalOptions>
     </ResourceCompile>
     <ResourceCompile>
       <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">..\shared;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Debug|ARM64'">..\shared;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">/g 0x0409 /q "muiconfig.xml" /fm "$(IntermediateOutputPath)%(Filename).en-US.res" %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Debug|ARM64'">/g 0x0409 /q "muiconfig.xml" /fm "$(IntermediateOutputPath)%(Filename).en-US.res" %(AdditionalOptions)</AdditionalOptions>
     </ResourceCompile>
     <ResourceCompile>
       <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Release|x64'">..\shared;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Release|ARM64'">..\shared;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release|x64'">/g 0x0409 /q "muiconfig.xml" /fm "$(IntermediateOutputPath)%(Filename).en-US.res" %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release|ARM64'">/g 0x0409 /q "muiconfig.xml" /fm "$(IntermediateOutputPath)%(Filename).en-US.res" %(AdditionalOptions)</AdditionalOptions>
     </ResourceCompile>
-    <PostBuildEvent>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">if not exist "$(OutDir)en-US" md "$(OutDir)en-US"
-link /dll /noentry /out:"$(OutDir)en-US\$(TargetFileName).mui" $(IntermediateOutputPath)ClassicShutdown.en-US.res
-
-rc /D "_UNICODE" /D "UNICODE" /I"$(SolutionDir)shared" /l 0x0411 /q "muiconfig.xml" /g 0x0409 /nologo /fo"$(IntermediateOutputPath)temp.res" /fm"$(IntermediateOutputPath)ClassicShutdown.ja-JP.res" ClassicShutdown.ja-JP.rc
-if not exist "$(OutDir)ja-JP" md "$(OutDir)ja-JP"
-link /dll /noentry /out:"$(OutDir)ja-JP\$(TargetFileName).mui" "$(IntermediateOutputPath)ClassicShutdown.ja-JP.res"
-muirct -c "$(TargetPath)" -e "$(OutDir)ja-JP\$(TargetFileName).mui"
-
-del "$(IntermediateOutputPath)temp.res"</Command>
-    </PostBuildEvent>
-    <PostBuildEvent>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">if not exist "$(OutDir)en-US" md "$(OutDir)en-US"
-link /dll /noentry /out:"$(OutDir)en-US\$(TargetFileName).mui" $(IntermediateOutputPath)ClassicShutdown.en-US.res
-
-rc /D "_UNICODE" /D "UNICODE" /I"$(SolutionDir)shared" /l 0x0411 /q "muiconfig.xml" /g 0x0409 /nologo /fo"$(IntermediateOutputPath)temp.res" /fm"$(IntermediateOutputPath)ClassicShutdown.ja-JP.res" ClassicShutdown.ja-JP.rc
-if not exist "$(OutDir)ja-JP" md "$(OutDir)ja-JP"
-link /dll /noentry /out:"$(OutDir)ja-JP\$(TargetFileName).mui" "$(IntermediateOutputPath)ClassicShutdown.ja-JP.res"
-muirct -c "$(TargetPath)" -e "$(OutDir)ja-JP\$(TargetFileName).mui"
-
-del "$(IntermediateOutputPath)temp.res"</Command>
-    </PostBuildEvent>
-    <PostBuildEvent>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">if not exist "$(OutDir)en-US" md "$(OutDir)en-US"
-link /dll /noentry /out:"$(OutDir)en-US\$(TargetFileName).mui" $(IntermediateOutputPath)ClassicShutdown.en-US.res
-
-rc /D "_UNICODE" /D "UNICODE" /I"$(SolutionDir)shared" /l 0x0411 /q "muiconfig.xml" /g 0x0409 /nologo /fo"$(IntermediateOutputPath)temp.res" /fm"$(IntermediateOutputPath)ClassicShutdown.ja-JP.res" ClassicShutdown.ja-JP.rc
-if not exist "$(OutDir)ja-JP" md "$(OutDir)ja-JP"
-link /dll /noentry /out:"$(OutDir)ja-JP\$(TargetFileName).mui" "$(IntermediateOutputPath)ClassicShutdown.ja-JP.res"
-muirct -c "$(TargetPath)" -e "$(OutDir)ja-JP\$(TargetFileName).mui"
-
-del "$(IntermediateOutputPath)temp.res"</Command>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|ARM64'">if not exist "$(OutDir)en-US" md "$(OutDir)en-US"
-link /dll /noentry /out:"$(OutDir)en-US\$(TargetFileName).mui" $(IntermediateOutputPath)ClassicShutdown.en-US.res
-
-rc /D "_UNICODE" /D "UNICODE" /I"$(SolutionDir)shared" /l 0x0411 /q "muiconfig.xml" /g 0x0409 /nologo /fo"$(IntermediateOutputPath)temp.res" /fm"$(IntermediateOutputPath)ClassicShutdown.ja-JP.res" ClassicShutdown.ja-JP.rc
-if not exist "$(OutDir)ja-JP" md "$(OutDir)ja-JP"
-link /dll /noentry /out:"$(OutDir)ja-JP\$(TargetFileName).mui" "$(IntermediateOutputPath)ClassicShutdown.ja-JP.res"
-muirct -c "$(TargetPath)" -e "$(OutDir)ja-JP\$(TargetFileName).mui"
-
-del "$(IntermediateOutputPath)temp.res"</Command>
-    </PostBuildEvent>
-    <PostBuildEvent>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">if not exist "$(OutDir)en-US" md "$(OutDir)en-US"
-link /dll /noentry /out:"$(OutDir)en-US\$(TargetFileName).mui" $(IntermediateOutputPath)ClassicShutdown.en-US.res
-
-rc /D "_UNICODE" /D "UNICODE" /I"$(SolutionDir)shared" /l 0x0411 /q "muiconfig.xml" /g 0x0409 /nologo /fo"$(IntermediateOutputPath)temp.res" /fm"$(IntermediateOutputPath)ClassicShutdown.ja-JP.res" ClassicShutdown.ja-JP.rc
-if not exist "$(OutDir)ja-JP" md "$(OutDir)ja-JP"
-link /dll /noentry /out:"$(OutDir)ja-JP\$(TargetFileName).mui" "$(IntermediateOutputPath)ClassicShutdown.ja-JP.res"
-muirct -c "$(TargetPath)" -e "$(OutDir)ja-JP\$(TargetFileName).mui"
-
-del "$(IntermediateOutputPath)temp.res"</Command>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release|ARM64'">if not exist "$(OutDir)en-US" md "$(OutDir)en-US"
-link /dll /noentry /out:"$(OutDir)en-US\$(TargetFileName).mui" $(IntermediateOutputPath)ClassicShutdown.en-US.res
-
-rc /D "_UNICODE" /D "UNICODE" /I"$(SolutionDir)shared" /l 0x0411 /q "muiconfig.xml" /g 0x0409 /nologo /fo"$(IntermediateOutputPath)temp.res" /fm"$(IntermediateOutputPath)ClassicShutdown.ja-JP.res" ClassicShutdown.ja-JP.rc
-if not exist "$(OutDir)ja-JP" md "$(OutDir)ja-JP"
-link /dll /noentry /out:"$(OutDir)ja-JP\$(TargetFileName).mui" "$(IntermediateOutputPath)ClassicShutdown.ja-JP.res"
-muirct -c "$(TargetPath)" -e "$(OutDir)ja-JP\$(TargetFileName).mui"
-
-del "$(IntermediateOutputPath)temp.res"</Command>
-    </PostBuildEvent>
     <ClCompile>
       <ExceptionHandling Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExceptionHandling>
       <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">/Gs8192 /Zc:threadSafeInit- %(AdditionalOptions)</AdditionalOptions>

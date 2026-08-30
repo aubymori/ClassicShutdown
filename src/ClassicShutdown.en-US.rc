@@ -2,8 +2,6 @@
 #include <winres.h>
 #include "Resource.h"
 
-#include "Version.rc"
-
 LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
 
 STRINGTABLE DISCARDABLE
